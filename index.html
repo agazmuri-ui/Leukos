@@ -526,15 +526,14 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-Ci2noZk7mSjx
 
 async function postToSheet(type, payload){
   if(enWebApp()){
-    await gasRun('guardarDatosServer', type, payload);
-    return;
+    return await gasRun('guardarDatosServer', type, payload);
   }
-  await fetch(APPS_SCRIPT_URL, {
+  const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
     headers: {'Content-Type': 'text/plain;charset=utf-8'},
     body: JSON.stringify({type, ...payload})
   });
+  return await res.json();
 }
 
 async function fetchFromSheet(){
@@ -583,6 +582,9 @@ let costosConfig = {}; // { coco: {parametros:{}, costos:{}, margen}, adviento: 
 let ventas = [];
 let compras = [];
 let datosListos = false;
+// Versión conocida de cada tipo de dato "sensible" (se sobrescribe completo al guardar).
+// Sirve para detectar si otro dispositivo/pestaña guardó cambios más nuevos antes que nosotros.
+let versions = {stock: 0, costos: 0, terminados: 0};
 let currentLine = 'coco';
 
 const fmt = (n) => new Intl.NumberFormat('es-CL').format(Math.round(n));
@@ -694,6 +696,7 @@ async function loadAll(){
       proveedor: row.Proveedor || ''
     }));
 
+    versions = data.versions || {stock: 0, costos: 0, terminados: 0};
     showToast('Datos cargados desde tu Sheet');
     datosListos = true;
   }catch(e){
@@ -721,7 +724,18 @@ function mostrarBannerSinConexion(){
   document.body.prepend(banner);
 }
 
-async function saveStock(){
+// Se muestra cuando otro dispositivo/pestaña guardó cambios más nuevos justo antes que nosotros.
+// Bloquea visualmente y obliga a recargar para no perder ni pisar datos de nadie.
+function mostrarBannerChoque(tipoLabel){
+  if(document.getElementById('bannerChoque')) return;
+  const banner = document.createElement('div');
+  banner.id = 'bannerChoque';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:var(--honey-deep);color:#fff;padding:14px 16px;text-align:center;font-size:14px;font-weight:600;z-index:9999;';
+  banner.innerHTML = `⚠️ Alguien más guardó cambios en ${tipoLabel} desde otro dispositivo/pestaña justo ahora. Para no perder nada, recarga antes de seguir editando. <button onclick="location.reload()" style="margin-left:8px;background:#fff;color:var(--honey-deep);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;">Recargar</button>`;
+  document.body.prepend(banner);
+}
+
+async function saveStockNow(){
   if(!datosListos){ mostrarBannerSinConexion(); return; }
   try{
     const fixedItems = STOCK_ITEMS.map(i => ({key: i.key, name: i.name, qty: stock[i.key] || 0, unit: i.unit}));
@@ -729,20 +743,49 @@ async function saveStock(){
     const frascoItems = frascos.map(f => ({key: f.key, name: f.name, qty: f.qty || 0, unit: 'un', foto: f.foto || ''}));
     const coloranteItems = colorantes.map(c => ({key: c.key, name: c.name, qty: c.qty || 0, unit: 'un', foto: c.foto || ''}));
     const pabiloItems = pabilos.map(p => ({key: p.key, name: p.name, qty: p.qty || 0, unit: 'm', foto: p.foto || ''}));
-    await postToSheet('stock', {items: [...fixedItems, ...aromaItems, ...frascoItems, ...coloranteItems, ...pabiloItems]});
+    const resultado = await postToSheet('stock', {
+      items: [...fixedItems, ...aromaItems, ...frascoItems, ...coloranteItems, ...pabiloItems],
+      versionEsperada: versions.stock
+    });
+    if(resultado && resultado.conflicto){
+      mostrarBannerChoque('Stock');
+    } else if(resultado && typeof resultado.version === 'number'){
+      versions.stock = resultado.version;
+    }
   }catch(e){ showToast('No se pudo guardar el stock (revisa tu internet)'); }
+}
+// Debounce: si se llama varias veces seguidas (ej. clics rápidos en +/-), solo se manda
+// el último guardado, evitando guardados superpuestos que duplican filas en el Sheet.
+let _saveStockTimer = null;
+function saveStock(){
+  return new Promise(resolve => {
+    clearTimeout(_saveStockTimer);
+    _saveStockTimer = setTimeout(() => { saveStockNow().then(resolve); }, 400);
+  });
 }
 async function saveCostos(){
   if(!datosListos){ mostrarBannerSinConexion(); return; }
-  try{ await postToSheet('costos', {items: buildCostosItems()}); }
-  catch(e){ showToast('No se pudo guardar costos (revisa tu internet)'); }
+  try{
+    const resultado = await postToSheet('costos', {items: buildCostosItems(), versionEsperada: versions.costos});
+    if(resultado && resultado.conflicto){
+      mostrarBannerChoque('Costos');
+    } else if(resultado && typeof resultado.version === 'number'){
+      versions.costos = resultado.version;
+    }
+  }catch(e){ showToast('No se pudo guardar costos (revisa tu internet)'); }
 }
 async function saveTerminados(){
   if(!datosListos){ mostrarBannerSinConexion(); return; }
   try{
-    await postToSheet('terminados', {
-      items: terminados.map(t => ({key: t.key, linea: t.linea, variante: t.variante, qty: t.qty || 0}))
+    const resultado = await postToSheet('terminados', {
+      items: terminados.map(t => ({key: t.key, linea: t.linea, variante: t.variante, qty: t.qty || 0})),
+      versionEsperada: versions.terminados
     });
+    if(resultado && resultado.conflicto){
+      mostrarBannerChoque('Velas listas (Producción)');
+    } else if(resultado && typeof resultado.version === 'number'){
+      versions.terminados = resultado.version;
+    }
   }catch(e){ showToast('No se pudo guardar velas listas (revisa tu internet)'); }
 }
 
