@@ -1221,7 +1221,7 @@ function renderStock(){
   list.appendChild(buildGroup('Línea cera de coco', 'coco', grouped.coco, 'coco'));
   list.appendChild(buildGroup('Línea cera de parafina', 'parafina', grouped.parafina, 'parafina'));
 
-  list.querySelectorAll('.qtybtn').forEach(btn => {
+  list.querySelectorAll('.qtybtn[data-key]').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.key;
       const item = STOCK_ITEMS.find(i=>i.key===key);
@@ -1231,7 +1231,7 @@ function renderStock(){
       saveStock();
     });
   });
-  list.querySelectorAll('input[type=number]').forEach(inp => {
+  list.querySelectorAll('input[type=number][data-key]').forEach(inp => {
     inp.addEventListener('change', () => {
       const key = inp.dataset.key;
       stock[key] = Math.max(0, parseFloat(inp.value) || 0);
