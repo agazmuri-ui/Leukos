@@ -754,16 +754,22 @@ async function saveStockNow(){
     }
   }catch(e){ showToast('No se pudo guardar el stock (revisa tu internet)'); }
 }
-// Debounce: si se llama varias veces seguidas (ej. clics rápidos en +/-), solo se manda
-// el último guardado, evitando guardados superpuestos que duplican filas en el Sheet.
+// Debounce + encadenado: si se llama varias veces seguidas (ej. clics rápidos en +/-), solo se
+// manda el último guardado. Además, cada guardado real espera a que el anterior haya terminado
+// del todo (incluida su respuesta) antes de leer versions.stock — si no, un segundo guardado
+// lanzado mientras el primero todavía viaja por internet leería una versión vieja y el servidor
+// lo rechazaría por error, pensando que fue otro dispositivo.
 let _saveStockTimer = null;
+let _stockSaveChain = Promise.resolve();
 function saveStock(){
   return new Promise(resolve => {
     clearTimeout(_saveStockTimer);
-    _saveStockTimer = setTimeout(() => { saveStockNow().then(resolve); }, 400);
+    _saveStockTimer = setTimeout(() => {
+      _stockSaveChain = _stockSaveChain.then(() => saveStockNow()).then(resolve, resolve);
+    }, 400);
   });
 }
-async function saveCostos(){
+async function saveCostosNow(){
   if(!datosListos){ mostrarBannerSinConexion(); return; }
   try{
     const resultado = await postToSheet('costos', {items: buildCostosItems(), versionEsperada: versions.costos});
@@ -774,7 +780,11 @@ async function saveCostos(){
     }
   }catch(e){ showToast('No se pudo guardar costos (revisa tu internet)'); }
 }
-async function saveTerminados(){
+let _costosSaveChain = Promise.resolve();
+function saveCostos(){
+  return _costosSaveChain = _costosSaveChain.then(() => saveCostosNow(), () => saveCostosNow());
+}
+async function saveTerminadosNow(){
   if(!datosListos){ mostrarBannerSinConexion(); return; }
   try{
     const resultado = await postToSheet('terminados', {
@@ -787,6 +797,10 @@ async function saveTerminados(){
       versions.terminados = resultado.version;
     }
   }catch(e){ showToast('No se pudo guardar velas listas (revisa tu internet)'); }
+}
+let _terminadosSaveChain = Promise.resolve();
+function saveTerminados(){
+  return _terminadosSaveChain = _terminadosSaveChain.then(() => saveTerminadosNow(), () => saveTerminadosNow());
 }
 
 // Calcula cuánta materia prima consume 1 unidad de una línea, dado su config de Costos
