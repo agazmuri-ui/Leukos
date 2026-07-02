@@ -573,6 +573,7 @@ function buildCostosItems(){
 
 // ---------- Estado ----------
 let stock = {};
+let stockFotos = {}; // fotos de los insumos fijos (cera, aceite, etc.), por key
 let aromas = [];
 let frascos = [];
 let colorantes = [];
@@ -633,6 +634,7 @@ async function loadAll(){
     const data = await fetchFromSheet();
 
     stock = {...DEFAULT_STOCK};
+    stockFotos = {};
     aromas = [];
     frascos = [];
     colorantes = [];
@@ -649,6 +651,7 @@ async function loadAll(){
         pabilos.push({key: row.Key, name: row.Insumo || 'Pabilo', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
       } else {
         stock[row.Key] = parseFloat(row.Cantidad) || 0;
+        if(row.Foto) stockFotos[row.Key] = row.Foto;
       }
     });
     if(aromas.length === 0 && (data.stock || []).length === 0){
@@ -702,6 +705,7 @@ async function loadAll(){
   }catch(e){
     console.warn('No se pudo conectar con el Sheet', e);
     stock = {...DEFAULT_STOCK};
+    stockFotos = {};
     aromas = DEFAULT_AROMAS.map(a => ({...a}));
     frascos = DEFAULT_FRASCOS.map(f => ({...f}));
     colorantes = DEFAULT_COLORANTES.map(c => ({...c}));
@@ -738,7 +742,7 @@ function mostrarBannerChoque(tipoLabel){
 async function saveStockNow(){
   if(!datosListos){ mostrarBannerSinConexion(); return; }
   try{
-    const fixedItems = STOCK_ITEMS.map(i => ({key: i.key, name: i.name, qty: stock[i.key] || 0, unit: i.unit}));
+    const fixedItems = STOCK_ITEMS.map(i => ({key: i.key, name: i.name, qty: stock[i.key] || 0, unit: i.unit, foto: stockFotos[i.key] || ''}));
     const aromaItems = aromas.map(a => ({key: a.key, name: a.name, qty: a.qty || 0, unit: 'ml', foto: a.foto || ''}));
     const frascoItems = frascos.map(f => ({key: f.key, name: f.name, qty: f.qty || 0, unit: 'un', foto: f.foto || ''}));
     const coloranteItems = colorantes.map(c => ({key: c.key, name: c.name, qty: c.qty || 0, unit: 'un', foto: c.foto || ''}));
@@ -952,7 +956,7 @@ function renderStock(){
       const div = document.createElement('div');
       div.className = 'stock-item';
       div.innerHTML = `
-        <div class="stock-row">
+        <div class="stock-row has-thumb">
           <span class="stock-name">${item.name}${isLow ? ' <span class="low-tag">bajo</span>' : ''}</span>
           <div class="stock-controls">
             <button class="qtybtn" data-act="minus" data-key="${item.key}">−</button>
@@ -963,6 +967,14 @@ function renderStock(){
         </div>
         <div class="bar-track"><div class="bar-fill ${item.line}" style="width:${pct}%"></div></div>
       `;
+      const thumbFijo = crearThumbEl(stockFotos[item.key], 'stock', item.key, () => {
+        const url = pedirFoto(stockFotos[item.key]);
+        if(url === null) return;
+        stockFotos[item.key] = url.trim();
+        renderStock();
+        saveStock();
+      });
+      div.querySelector('.stock-row').insertBefore(thumbFijo, div.querySelector('.stock-name'));
       wrap.appendChild(div);
     });
 
