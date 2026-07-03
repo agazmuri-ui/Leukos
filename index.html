@@ -37,7 +37,7 @@
     min-height:100vh;
     padding-bottom:115px;
   }
-  .app{max-width:1400px;margin:0 auto;padding:0 32px;}
+  .app{max-width:1700px;margin:0 auto;padding:0 32px;}
 
   header.top{
     display:flex;align-items:center;gap:15px;
@@ -69,7 +69,7 @@
     background:var(--charcoal);
     border-radius:26px;
     display:flex;
-    max-width:1336px;margin:0 auto;
+    max-width:1636px;margin:0 auto;
     padding:9px;gap:5px;
     box-shadow:0 10px 31px -8px rgba(43,36,32,0.35);
   }
@@ -112,19 +112,19 @@
   /* STOCK */
   #stockList{display:flex;gap:10px;align-items:flex-start;}
   #stockList .card{flex:1;min-width:0;padding:14px 12px;}
-  #stockList .card-header{font-size:15px;gap:8px;margin-bottom:13px;}
-  #stockList .stock-name{font-size:15px;line-height:1.25;}
-  #stockList .stock-qty{font-size:15px;}
+  #stockList .card-header{font-size:17px;gap:8px;margin-bottom:13px;}
+  #stockList .stock-name{font-size:17px;line-height:1.3;}
+  #stockList .stock-qty{font-size:17px;}
   #stockList .stock-item{margin-bottom:15px;}
   #stockList .stock-controls{gap:5px;}
-  #stockList .stock-controls input{width:76px;font-size:14px;padding:6px 4px;text-align:center;}
-  #stockList .qtybtn{width:31px;height:31px;font-size:17px;border-radius:9px;}
-  #stockList .low-tag{font-size:12px;padding:3px 6px;}
+  #stockList .stock-controls input{width:80px;font-size:16px;padding:7px 4px;text-align:center;}
+  #stockList .qtybtn{width:34px;height:34px;font-size:19px;border-radius:9px;}
+  #stockList .low-tag{font-size:13px;padding:3px 6px;}
   #stockList .stock-row{flex-wrap:wrap;gap:5px;margin-bottom:8px;}
   #stockList .aroma-block{padding-left:10px;margin-top:12px;}
-  #stockList .aroma-title{font-size:15px;}
-  #stockList .aroma-name-input, #stockList .frasco-name-input, #stockList .colorante-name-input, #stockList .pabilo-name-input{font-size:15px;}
-  #stockList .aroma-add{font-size:13px;padding:6px 10px;}
+  #stockList .aroma-title{font-size:17px;}
+  #stockList .aroma-name-input, #stockList .frasco-name-input, #stockList .colorante-name-input, #stockList .pabilo-name-input{font-size:17px;}
+  #stockList .aroma-add{font-size:14px;padding:6px 10px;}
   #stockList .frasco-block{margin-top:12px;}
 
   .stock-item:last-child{margin-bottom:0;}
@@ -133,19 +133,19 @@
     margin-top:14px;padding-left:14px;border-left:2px solid var(--sage);
   }
   .aroma-title{
-    font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:18px;
+    font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:20px;
     color:var(--sage-deep);margin-bottom:10px;
   }
   .aroma-item{margin-bottom:12px;}
   .aroma-name-input, .frasco-name-input, .colorante-name-input, .pabilo-name-input{
-    border:none;background:transparent;font-weight:600;font-size:17px;color:var(--charcoal);
+    border:none;background:transparent;font-weight:600;font-size:19px;color:var(--charcoal);
     padding:0;font-family:'Inter',sans-serif;width:auto;flex:1;min-width:0;
   }
   .insumo-thumb{
-    width:34px;height:34px;border-radius:9px;flex:none;overflow:hidden;cursor:pointer;
+    width:48px;height:48px;border-radius:11px;flex:none;overflow:hidden;cursor:pointer;
     background-color:var(--linen-deep);
     background-image:none;
-    background-repeat:no-repeat;background-position:center;background-size:16px 16px;
+    background-repeat:no-repeat;background-position:center;background-size:22px 22px;
     box-shadow:0 1px 3px rgba(43,36,32,0.15);border:1px solid var(--line);
   }
   .insumo-thumb.vacio{
@@ -1072,7 +1072,7 @@ function renderStock(){
           saveStock();
         });
       });
-
+    } else if(lineKey === 'frascos'){
       const frascosBlock = document.createElement('div');
       frascosBlock.className = 'aroma-block frasco-block';
       frascosBlock.innerHTML = `<div class="aroma-title frasco-title">Frascos</div>`;
@@ -1306,6 +1306,7 @@ function renderStock(){
   };
 
   list.appendChild(buildGroup('Línea cera de coco', 'coco', grouped.coco, 'coco'));
+  list.appendChild(buildGroup('Frascos', 'coco', [], 'frascos'));
   list.appendChild(buildGroup('Línea cera de parafina', 'parafina', grouped.parafina, 'parafina'));
 
   list.querySelectorAll('.qtybtn[data-key]').forEach(btn => {
