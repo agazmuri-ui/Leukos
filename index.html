@@ -530,6 +530,7 @@ async function postToSheet(type, payload){
   }
   const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
+    cache: 'no-store',
     headers: {'Content-Type': 'text/plain;charset=utf-8'},
     body: JSON.stringify({type, ...payload})
   });
@@ -540,7 +541,9 @@ async function fetchFromSheet(){
   if(enWebApp()){
     return await gasRun('obtenerDatosServer');
   }
-  const res = await fetch(APPS_SCRIPT_URL + '?data=1', {method: 'GET'});
+  // cache:'no-store' + timestamp único en la URL: evita que el navegador sirva una respuesta
+  // vieja guardada en caché, lo que haría creer a la app que está en una versión desactualizada.
+  const res = await fetch(APPS_SCRIPT_URL + '?data=1&_=' + Date.now(), {method: 'GET', cache: 'no-store'});
   return await res.json();
 }
 
@@ -730,12 +733,27 @@ function mostrarBannerSinConexion(){
 
 // Se muestra cuando otro dispositivo/pestaña guardó cambios más nuevos justo antes que nosotros.
 // Bloquea visualmente y obliga a recargar para no perder ni pisar datos de nadie.
-function mostrarBannerChoque(tipoLabel){
-  if(document.getElementById('bannerChoque')) return;
+function mostrarBannerChoque(tipoKey, tipoLabel, versionActual, forzarFn){
+  const existente = document.getElementById('bannerChoque');
+  if(existente) existente.remove();
   const banner = document.createElement('div');
   banner.id = 'bannerChoque';
   banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:var(--honey-deep);color:#fff;padding:14px 16px;text-align:center;font-size:14px;font-weight:600;z-index:9999;';
-  banner.innerHTML = `⚠️ Alguien más guardó cambios en ${tipoLabel} desde otro dispositivo/pestaña justo ahora. Para no perder nada, recarga antes de seguir editando. <button onclick="location.reload()" style="margin-left:8px;background:#fff;color:var(--honey-deep);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;">Recargar</button>`;
+  const btnForzar = document.createElement('button');
+  btnForzar.textContent = 'Guardar de todas formas';
+  btnForzar.style.cssText = 'margin-left:8px;background:#fff;color:var(--honey-deep);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;';
+  btnForzar.addEventListener('click', () => {
+    banner.remove();
+    versions[tipoKey] = versionActual;
+    forzarFn();
+  });
+  const btnRecargar = document.createElement('button');
+  btnRecargar.textContent = 'Recargar (recomendado)';
+  btnRecargar.style.cssText = 'margin-left:8px;background:#fff;color:var(--honey-deep);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;';
+  btnRecargar.addEventListener('click', () => location.reload());
+  banner.textContent = `⚠️ Se detectó un guardado con una versión distinta a la que tenías cargada de ${tipoLabel}. Si es un error, puedes forzar el guardado; si no, recarga para no perder nada de nadie.`;
+  banner.appendChild(btnRecargar);
+  banner.appendChild(btnForzar);
   document.body.prepend(banner);
 }
 
@@ -752,7 +770,7 @@ async function saveStockNow(){
       versionEsperada: versions.stock
     });
     if(resultado && resultado.conflicto){
-      mostrarBannerChoque('Stock');
+      mostrarBannerChoque('stock', 'Stock', resultado.versionActual, () => saveStock());
     } else if(resultado && typeof resultado.version === 'number'){
       versions.stock = resultado.version;
     }
@@ -778,7 +796,7 @@ async function saveCostosNow(){
   try{
     const resultado = await postToSheet('costos', {items: buildCostosItems(), versionEsperada: versions.costos});
     if(resultado && resultado.conflicto){
-      mostrarBannerChoque('Costos');
+      mostrarBannerChoque('costos', 'Costos', resultado.versionActual, () => saveCostos());
     } else if(resultado && typeof resultado.version === 'number'){
       versions.costos = resultado.version;
     }
@@ -796,7 +814,7 @@ async function saveTerminadosNow(){
       versionEsperada: versions.terminados
     });
     if(resultado && resultado.conflicto){
-      mostrarBannerChoque('Velas listas (Producción)');
+      mostrarBannerChoque('terminados', 'Velas listas (Producción)', resultado.versionActual, () => saveTerminados());
     } else if(resultado && typeof resultado.version === 'number'){
       versions.terminados = resultado.version;
     }
