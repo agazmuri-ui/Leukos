@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leukos · Panel de Negocios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --linen:#EAE2D2;
+    --linen-deep:#DED3BC;
+    --card:#FAF5E9;
+    --charcoal:#2B2420;
+    --charcoal-soft:#736A5E;
+    --honey:#C4801E;
+    --honey-deep:#9C6417;
+    --sage:#788758;
+    --sage-deep:#586340;
+    --slate:#8A8479;
+    --slate-deep:#645F55;
+    --rust:#A8492C;
+    --line:#DCD0B4;
+    --radius:16px;
+    --shadow: 0 3px 13px -3px rgba(43,36,32,0.10), 0 2px 3px rgba(43,36,32,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background-color:var(--linen);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(196,128,30,0.07), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(120,135,88,0.07), transparent 45%);
+    color:var(--charcoal);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom:115px;
+  }
+  .app{max-width:1700px;margin:0 auto;padding:0 32px;}
+
+  header.top{
+    display:flex;align-items:center;gap:15px;
+    padding:33px 3px 23px;
+  }
+  .logo-wrap{
+    width:115px;height:115px;border-radius:50%;flex:none;overflow:hidden;
+    box-shadow:0 3px 10px rgba(43,36,32,0.25);
+  }
+  .logo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+  header.top .title-block{display:flex;flex-direction:column;}
+  header.top h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:35px;
+    letter-spacing:0px;
+    margin:0;
+    line-height:1;
+  }
+  header.top .tagline{font-size:14px;color:var(--charcoal-soft);letter-spacing:1px;margin-top:3px;}
+  header.top .sub{
+    font-size:15px;color:var(--charcoal-soft);margin-left:auto;text-align:right;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  nav.tabs{
+    position:fixed;bottom:18px;left:20px;right:20px;
+    background:var(--charcoal);
+    border-radius:26px;
+    display:flex;
+    max-width:1636px;margin:0 auto;
+    padding:9px;gap:5px;
+    box-shadow:0 10px 31px -8px rgba(43,36,32,0.35);
+  }
+  nav.tabs button{
+    flex:1;background:transparent;border:none;border-radius:16px;
+    padding:10px 3px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
+    color:rgba(250,245,233,0.55);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    transition:all .2s ease;
+  }
+  nav.tabs button.active{color:var(--charcoal);background:var(--honey);}
+  nav.tabs button svg{width:21px;height:21px;}
+
+  section.view{display:none;padding:3px 0 26px;}
+  section.view.active{display:block;animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+  h2.section-title{
+    font-family:'Fraunces',serif;font-weight:600;font-size:26px;
+    margin:26px 0 5px;color:var(--charcoal);
+  }
+  .muted{color:var(--charcoal-soft);font-size:16px;}
+  .eyebrow{
+    font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    color:var(--charcoal-soft);margin-bottom:3px;display:block;
+  }
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;margin-bottom:15px;box-shadow:var(--shadow);
+  }
+  .card-header{
+    display:flex;align-items:center;gap:10px;margin-bottom:15px;
+    font-weight:700;font-size:18px;color:var(--charcoal);
+  }
+  .card-header .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .dot.coco{background:var(--sage);}
+  .dot.parafina{background:var(--slate);}
+
+  /* STOCK */
+  #stockList{display:flex;gap:10px;align-items:flex-start;}
+  #stockList .card{flex:1;min-width:0;padding:14px 12px;}
+  #stockList .card-header{font-size:17px;gap:8px;margin-bottom:13px;}
+  #stockList .stock-name{font-size:17px;line-height:1.3;}
+  #stockList .stock-qty{font-size:17px;}
+  #stockList .stock-item{margin-bottom:15px;}
+  #stockList .stock-controls{gap:5px;}
+  #stockList .stock-controls input{width:80px;font-size:16px;padding:7px 4px;text-align:center;}
+  #stockList .qtybtn{width:34px;height:34px;font-size:19px;border-radius:9px;}
+  #stockList .low-tag{font-size:13px;padding:3px 6px;}
+  #stockList .stock-row{flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+  #stockList .aroma-block{padding-left:10px;margin-top:12px;}
+  #stockList .aroma-title{font-size:17px;}
+  #stockList .aroma-name-input, #stockList .frasco-name-input, #stockList .colorante-name-input, #stockList .pabilo-name-input{font-size:17px;}
+  #stockList .aroma-add{font-size:14px;padding:6px 10px;}
+  #stockList .frasco-block{margin-top:12px;}
+
+  .stock-item:last-child{margin-bottom:0;}
+
+  .aroma-block{
+    margin-top:14px;padding-left:14px;border-left:2px solid var(--sage);
+  }
+  .aroma-title{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:20px;
+    color:var(--sage-deep);margin-bottom:10px;
+  }
+  .aroma-item{margin-bottom:12px;}
+  .aroma-name-input, .frasco-name-input, .colorante-name-input, .pabilo-name-input{
+    border:none;background:transparent;font-weight:600;font-size:19px;color:var(--charcoal);
+    padding:0;font-family:'Inter',sans-serif;width:auto;flex:1;min-width:0;
+  }
+  .insumo-thumb{
+    width:48px;height:48px;border-radius:11px;flex:none;overflow:hidden;cursor:pointer;
+    background-color:var(--linen-deep);
+    background-image:none;
+    background-repeat:no-repeat;background-position:center;background-size:22px 22px;
+    box-shadow:0 1px 3px rgba(43,36,32,0.15);border:1px solid var(--line);
+  }
+  .insumo-thumb.vacio{
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23736A5E' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Ccircle cx='8.5' cy='10.5' r='1.5'/%3E%3Cpath d='M21 15l-5-5-9 9'/%3E%3C/svg%3E");
+    opacity:0.7;
+  }
+  .insumo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .insumo-thumb:hover{opacity:0.85;}
+  .stock-row.has-thumb{gap:10px;}
+  .aroma-name-input:focus, .frasco-name-input:focus, .colorante-name-input:focus, .pabilo-name-input:focus{
+    outline:1px solid var(--honey);outline-offset:2px;border-radius:4px;
+  }
+  .aroma-del{
+    background:none;border:none;color:var(--rust);font-size:12px;font-weight:600;
+    cursor:pointer;padding:0;margin-left:4px;
+  }
+  .aroma-add{
+    background:var(--linen-deep);border:none;border-radius:9px;color:var(--charcoal);
+    font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;margin-top:2px;
+  }
+  .frasco-block{border-left-color:var(--honey);}
+  .frasco-title{color:var(--honey-deep);}
+  .colorante-block{border-left-color:var(--rust);}
+  .colorante-title{color:var(--rust);}
+  .pabilo-block{border-left-color:var(--slate);}
+  .pabilo-title{color:var(--slate-deep);}
+  .stock-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .stock-name{font-weight:600;font-size:17px;flex:1;min-width:90px;}
+  .stock-qty{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+  .stock-qty.low{color:var(--rust);}
+  .bar-track{height:13px;border-radius:10px;background:var(--linen-deep);overflow:visible;position:relative;}
+  .bar-fill{height:100%;border-radius:10px;transition:width .3s ease;position:relative;}
+  .bar-fill.coco{background:linear-gradient(90deg,var(--sage-deep),var(--sage));}
+  .bar-fill.parafina{background:linear-gradient(90deg,var(--slate-deep),var(--slate));}
+  .bar-fill::after{
+    content:'';position:absolute;right:-4px;top:50%;transform:translateY(-50%);
+    width:13px;height:13px;border-radius:50%;box-shadow:0 2px 4px rgba(43,36,32,0.3);
+  }
+  .bar-fill.coco::after{background:var(--sage-deep);}
+  .bar-fill.parafina::after{background:var(--slate-deep);}
+  .stock-controls{display:flex;align-items:center;gap:6px;flex:none;}
+  .stock-controls input{
+    width:98px;font-family:'JetBrains Mono',monospace;font-size:17px;text-align:center;
+    border:2px solid var(--line);border-radius:12px;padding:8px 6px;background:#fff;
+  }
+  .qtybtn{
+    width:38px;height:38px;border-radius:12px;border:none;background:var(--linen-deep);
+    font-size:20px;font-weight:700;color:var(--charcoal);cursor:pointer;line-height:1;
+    transition:background .15s ease;
+  }
+  .qtybtn:active{background:var(--honey);color:#fff;}
+  .unit-label{font-size:14px;color:var(--charcoal-soft);margin-left:3px;}
+  .low-tag{
+    font-size:13px;font-weight:700;color:var(--rust);margin-left:6px;
+    background:rgba(168,73,44,0.1);padding:4px 10px;border-radius:26px;display:inline-block;
+  }
+
+  /* COSTOS */
+  .line-switch{display:flex;gap:8px;margin-bottom:20px;}
+  .line-switch button{
+    flex:1;padding:13px 8px;border-radius:15px;border:2px solid var(--line);
+    background:var(--card);font-size:15px;font-weight:700;color:var(--charcoal-soft);cursor:pointer;
+    transition:all .15s ease;
+  }
+  .line-switch button.active{background:var(--charcoal);color:var(--linen);border-color:var(--charcoal);}
+
+  .field-row{display:flex;justify-content:space-between;align-items:center;gap:13px;margin-bottom:12px;}
+  .field-row label{font-size:16px;flex:1;color:var(--charcoal);}
+  .field-row .input-wrap{display:flex;align-items:center;gap:6px;}
+  .field-row input{
+    width:105px;font-family:'JetBrains Mono',monospace;font-size:17px;text-align:right;
+    border:2px solid var(--line);border-radius:12px;padding:9px 10px;background:#fff;
+  }
+  .field-row input:focus{outline:3px solid var(--honey);outline-offset:2px;}
+  .field-row .unit-label{width:33px;text-align:left;}
+  .divider{height:2px;background:var(--line);margin:18px 0;}
+  .result-box{
+    background:linear-gradient(135deg, var(--charcoal) 0%, #3A322B 100%);
+    color:var(--linen);border-radius:15px;padding:18px 20px;margin-top:10px;
+  }
+  .result-line{display:flex;justify-content:space-between;font-size:16px;margin-bottom:6px;opacity:0.8;}
+  .result-line.total{
+    font-weight:700;font-size:22px;margin-top:10px;padding-top:13px;
+    border-top:2px dashed rgba(250,245,233,0.25);opacity:1;
+    font-family:'Fraunces',serif;
+  }
+  .result-line .val{font-family:'JetBrains Mono',monospace;}
+  .result-line.total .val{font-family:'Fraunces',serif;font-size:24px;color:var(--honey);}
+  .margin-slider{width:100%;margin:8px 0 3px;accent-color:var(--honey);}
+
+  /* VENTAS */
+  .ventas-summary{
+    background:linear-gradient(135deg, var(--charcoal) 0%, #3A322B 100%);
+    color:var(--linen);border-radius:var(--radius);
+    padding:26px;margin-bottom:18px;box-shadow:var(--shadow);
+  }
+  .ventas-summary .amount{font-family:'Fraunces',serif;font-size:38px;font-weight:600;color:#fff;}
+  .ventas-summary .label{font-size:15px;opacity:0.65;margin-top:4px;}
+  .venta-form input, .venta-form select{
+    width:100%;font-size:18px;padding:13px 14px;border-radius:13px;border:2px solid var(--line);
+    background:#fff;font-family:'Inter',sans-serif;margin-bottom:12px;
+  }
+  .venta-form input:focus, .venta-form select:focus{outline:3px solid var(--honey);outline-offset:2px;}
+  .venta-form .row2{display:flex;gap:10px;}
+  .venta-form .row2 > div{flex:1;}
+  .btn-primary{
+    width:100%;background:var(--honey);color:#fff;border:none;border-radius:14px;
+    padding:15px;font-weight:700;font-size:18px;cursor:pointer;font-family:'Inter',sans-serif;
+    transition:background .15s ease;
+  }
+  .btn-primary:active{background:var(--honey-deep);}
+  .venta-item{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    padding:15px 0;border-bottom:2px solid var(--line);
+  }
+  .venta-item:last-child{border-bottom:none;}
+  .venta-item .meta{font-size:15px;color:var(--charcoal-soft);margin-top:3px;}
+  .venta-item .prod{font-weight:700;font-size:18px;}
+  .venta-item .amt{font-family:'Fraunces',serif;font-weight:600;font-size:20px;}
+  .venta-item .del{
+    background:none;border:none;color:var(--rust);font-size:14px;cursor:pointer;
+    padding:0;margin-top:8px;font-weight:600;
+  }
+  .empty{text-align:center;padding:38px 13px;color:var(--charcoal-soft);font-size:17px;}
+  .toast{
+    position:fixed;bottom:141px;left:50%;transform:translateX(-50%) translateY(13px);
+    background:var(--charcoal);color:var(--linen);padding:12px 23px;border-radius:31px;
+    font-size:16px;opacity:0;transition:all .25s ease;pointer-events:none;
+    max-width:88%;text-align:center;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo-wrap">
+      <img id="logoImg" alt="Leukos">
+    </div>
+    <div class="title-block">
+      <h1>Leukos</h1>
+      <span class="tagline">PANEL DE NEGOCIOS</span>
+    </div>
+    <div class="sub" id="dateNow"></div>
+  </header>
+
+  <!-- STOCK -->
+  <section class="view active" id="view-stock">
+    <h2 class="section-title">Stock de insumos</h2>
+    <p class="muted" style="margin-bottom:14px;">Toca + / − o edita el número. Se guarda solo.</p>
+    <div id="stockList"></div>
+  </section>
+
+  <!-- COSTOS -->
+  <section class="view" id="view-costos">
+    <h2 class="section-title">Costos y precios</h2>
+    <div class="line-switch" id="lineSwitch"></div>
+    <div id="costosBody"></div>
+  </section>
+
+  <!-- PRODUCCIÓN -->
+  <section class="view" id="view-produccion">
+    <h2 class="section-title">Producción</h2>
+    <p class="muted" style="margin-bottom:14px;">Registra lo que fabricaste: descuenta materia prima y suma a "Velas listas".</p>
+    <div class="card">
+      <div class="card-header">Registrar producción</div>
+      <select id="pLinea" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);margin-bottom:10px;font-size:14px;">
+        <option value="coco">Vela coco</option>
+        <option value="adviento">Vela adviento</option>
+        <option value="concreto">Vela concreto/parafina</option>
+      </select>
+      <div id="pAromaWrap" style="margin-bottom:10px;">
+        <select id="pAroma" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:14px;"></select>
+      </div>
+      <div id="pFrascoWrap" style="margin-bottom:10px;">
+        <select id="pFrasco" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:14px;"></select>
+      </div>
+      <div id="pColoranteWrap" style="margin-bottom:10px;">
+        <select id="pColorante" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:14px;"></select>
+      </div>
+      <div id="pPabiloWrap" style="margin-bottom:10px;">
+        <select id="pPabilo" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);font-size:14px;"></select>
+      </div>
+      <input type="text" id="pVariante" placeholder="Variante (ej: frasco verde, set 4 velas)" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);margin-bottom:10px;font-size:14px;">
+      <input type="number" id="pCantidad" placeholder="Cantidad producida" min="1" value="1" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);margin-bottom:10px;font-size:14px;">
+      <button class="btn-primary" id="btnProducir">Registrar producción</button>
+    </div>
+    <h2 class="section-title" style="font-size:18px;">Velas listas para vender</h2>
+    <div class="card" id="terminadosList"></div>
+  </section>
+
+  <!-- COMPRAS -->
+  <section class="view" id="view-compras">
+    <h2 class="section-title">Compras y balance</h2>
+    <div class="ventas-summary" id="balanceBox">
+      <span class="eyebrow" style="color:rgba(250,245,233,0.55);">Este mes</span>
+      <div class="amount" id="balanceMonto">$0</div>
+      <div class="label" id="balanceLabel">utilidad (ingresos − costos)</div>
+    </div>
+    <div class="card">
+      <div class="card-header">Registrar compra de insumo</div>
+      <div class="row2">
+        <div><input type="date" id="cFecha"></div>
+        <div><input type="text" id="cProveedor" placeholder="Proveedor (opcional)"></div>
+      </div>
+      <select id="cInsumo" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);margin-bottom:10px;font-size:14px;"></select>
+      <input type="text" id="cInsumoOtro" placeholder="Nombre del insumo" style="display:none;width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);margin-bottom:10px;font-size:14px;">
+      <div class="row2">
+        <div><input type="number" id="cCantidad" placeholder="Cantidad comprada" min="0" step="any"></div>
+        <div><input type="number" id="cCostoUnit" placeholder="Costo unitario ($)" min="0"></div>
+      </div>
+      <div class="result-box" style="margin-top:2px;">
+        <div class="result-line total"><span>Monto total</span><span class="val" id="cMontoTotal">$0</span></div>
+      </div>
+      <button class="btn-primary" id="btnAddCompra" style="margin-top:10px;">Registrar compra</button>
+    </div>
+    <h2 class="section-title" style="font-size:18px;">Historial de compras</h2>
+    <div class="card" id="comprasList"></div>
+  </section>
+
+  <!-- VENTAS -->
+  <section class="view" id="view-ventas">
+    <h2 class="section-title">Registro de ventas</h2>
+    <div class="ventas-summary">
+      <span class="eyebrow" style="color:rgba(250,245,233,0.55);">Este mes</span>
+      <div class="amount" id="ventasMesTotal">$0</div>
+      <div class="label" id="ventasMesLabel">vendido</div>
+    </div>
+    <div class="card venta-form">
+      <div class="row2">
+        <div><input type="date" id="vFecha"></div>
+        <div>
+          <select id="vLinea">
+            <option value="coco">Vela coco</option>
+            <option value="adviento">Vela adviento</option>
+            <option value="concreto">Vela concreto/parafina</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <select id="vVarianteSelect" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);margin-bottom:10px;font-size:14px;"></select>
+      <input type="text" id="vProducto" placeholder="Detalle (ej: Vela 160ml Violeta, frasco verde)" style="display:none;">
+      <div class="row2">
+        <div><input type="number" id="vCantidad" placeholder="Cantidad" min="1" value="1"></div>
+        <div><input type="number" id="vPrecio" placeholder="Precio unitario ($)"></div>
+      </div>
+      <input type="text" id="vCliente" placeholder="Cliente (opcional)">
+      <button class="btn-primary" id="btnAddVenta">Registrar venta</button>
+    </div>
+    <h2 class="section-title" style="font-size:16px;">Historial</h2>
+    <div class="card" id="ventasList"></div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="stock">
+      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h16M6 20V10a2 2 0 012-2h8a2 2 0 012 2v10M9 8V6a3 3 0 016 0v2"/></svg>
+      Stock
+    </button>
+    <button class="tab-btn" data-view="produccion">
+      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v6M8 5l4 3 4-3M6 22h12l-1.5-7a3 3 0 00-3-2.4h-3a3 3 0 00-3 2.4L6 22z"/></svg>
+      Producción
+    </button>
+    <button class="tab-btn" data-view="costos">
+      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M17 7H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H6"/></svg>
+      Costos
+    </button>
+    <button class="tab-btn" data-view="compras">
+      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12L6 6zM6 6L5 2H2M9 10v3M12 10v3M15 10v3M8 21a1 1 0 100-2 1 1 0 000 2zM17 21a1 1 0 100-2 1 1 0 000 2z"/></svg>
+      Compras
+    </button>
+    <button class="tab-btn" data-view="ventas">
+      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18M3 3l2 12.5a2 2 0 002 1.5h10a2 2 0 002-1.5L21 7H5.2M8 21a1 1 0 100-2 1 1 0 000 2zM17 21a1 1 0 100-2 1 1 0 000 2z"/></svg>
+      Ventas
+    </button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Config de insumos (stock) ----------
+const STOCK_ITEMS = [
+  {key:'cera_coco', name:'Cera de coco', unit:'kg', line:'coco', low:2, ref:15, step:0.5},
+  {key:'pabilo_coco', name:'Pabilo (calibre coco)', unit:'m', line:'coco', low:1, ref:12.5, step:0.5},
+  {key:'portapabilos', name:'Porta-pabilos', unit:'un', line:'coco', low:10, ref:100, step:5},
+  {key:'stickers', name:'Stickers porta-pabilo', unit:'un', line:'coco', low:15, ref:300, step:5},
+  {key:'cera_parafina', name:'Cera de parafina', unit:'kg', line:'parafina', low:2, ref:14, step:0.5},
+  {key:'envases_concreto', name:'Envases de concreto', unit:'un', line:'parafina', low:1, ref:8, step:1},
+];
+
+const DEFAULT_STOCK = {
+  cera_coco: 0,
+  pabilo_coco: 0, portapabilos: 0, stickers: 0,
+  cera_parafina: 0, envases_concreto: 0
+};
+
+const DEFAULT_PABILOS = [
+  {key:'pabilopar_g1', name:'Pabilo G1', qty:0}
+];
+
+const DEFAULT_COLORANTES = [];
+
+const DEFAULT_FRASCOS = [];
+
+const DEFAULT_AROMAS = [];
+
+const DEFAULT_MATERIALES = [
+  {key:'material_logo_crema', name:'Logo Crema', qty:0},
+  {key:'material_logo_gris', name:'Logo Gris', qty:0},
+  {key:'material_logo_negro', name:'Logo Negro', qty:0},
+  {key:'material_sticker_instrucciones', name:'Sticker instrucciones', qty:0},
+  {key:'material_bolsa_peq_negra', name:'Bolsa pequeña negra', qty:0},
+  {key:'material_bolsa_med_cafe', name:'Bolsa mediana café', qty:0}
+];
+
+// ---------- Config de líneas de costo ----------
+// "parametros": características físicas de la vela (editables, afectan el cálculo)
+// "costos": precio pagado por cada insumo
+const LINES = {
+  coco: {
+    label: 'Coco',
+    fullLabel: 'Vela de cera de coco',
+    dotClass: 'coco',
+    parametros: [
+      {key:'volumen_ml', label:'Volumen de la vela', unit:'ml', def:160},
+      {key:'aroma_ml', label:'Aroma', unit:'ml', def:12},
+      {key:'densidad', label:'Densidad cera coco', unit:'g/ml', def:0.91},
+      {key:'pabilo_cm', label:'Largo de pabilo por vela', unit:'cm', def:12.5},
+    ],
+    costos: [
+      {key:'costo_cera_kg', label:'Cera de coco', unit:'$/kg', def:0},
+      {key:'costo_aroma_ml', label:'Aroma', unit:'$/ml', def:0},
+      {key:'costo_pabilo', label:'Pabilo', unit:'$/u', def:0},
+      {key:'costo_portapabilo', label:'Porta-pabilo', unit:'$/u', def:0},
+      {key:'costo_sticker', label:'Sticker', unit:'$/u', def:0},
+      {key:'costo_frasco', label:'Frasco + tapa', unit:'$/u', def:0},
+    ],
+    derived: (p) => {
+      const cera_g = Math.max(0, (p.volumen_ml - p.aroma_ml)) * p.densidad;
+      return {cera_g};
+    },
+    calc: (p, c, d) => (d.cera_g/1000*c.costo_cera_kg) + (p.aroma_ml*c.costo_aroma_ml) + c.costo_pabilo + c.costo_portapabilo + c.costo_sticker + c.costo_frasco
+  },
+  adviento: {
+    label: 'Adviento',
+    fullLabel: 'Vela de adviento (parafina)',
+    dotClass: 'parafina',
+    parametros: [
+      {key:'cera_g', label:'Cera por vela', unit:'g', def:100},
+      {key:'pabilo_cm', label:'Largo de pabilo por vela', unit:'cm', def:13.5},
+    ],
+    costos: [
+      {key:'costo_cera_kg', label:'Parafina', unit:'$/kg', def:0},
+      {key:'costo_pabilo', label:'Pabilo', unit:'$/u', def:0},
+      {key:'costo_colorante_kg', label:'Colorante (por kg teñido)', unit:'$/kg', def:0},
+    ],
+    derived: (p) => ({cera_g: p.cera_g}),
+    calc: (p, c, d) => (d.cera_g/1000*c.costo_cera_kg) + c.costo_pabilo + (d.cera_g/1000*c.costo_colorante_kg)
+  },
+  concreto: {
+    label: 'Concreto',
+    fullLabel: 'Vela en envase de concreto',
+    dotClass: 'parafina',
+    parametros: [
+      {key:'cera_g', label:'Cera por pieza', unit:'g', def:400},
+      {key:'pabilo_cm', label:'Largo de pabilo por pieza', unit:'cm', def:15},
+    ],
+    costos: [
+      {key:'costo_cera_kg', label:'Parafina', unit:'$/kg', def:0},
+      {key:'costo_pabilo', label:'Pabilo', unit:'$/u', def:0},
+      {key:'costo_envase', label:'Envase de concreto', unit:'$/u', def:0},
+    ],
+    derived: (p) => ({cera_g: p.cera_g}),
+    calc: (p, c, d) => (d.cera_g/1000*c.costo_cera_kg) + c.costo_pabilo + c.costo_envase
+  }
+};
+
+// Insumos "de a 1 por unidad" que consume cada vela producida, además de cera/aroma/pabilo
+// (cera y pabilo se calculan con los parámetros editables de Costos; frascos se descuentan por variante elegida)
+const RECETA_FIJA = {
+  coco: {portapabilos: 1, stickers: 1},
+  adviento: {},
+  concreto: {envases_concreto: 1}
+};
+
+// ---------- Backend: Google Sheet vía Apps Script ----------
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-Ci2noZk7mSjxjmL7K1N2ofUXK8CVXVe0Vv8q5bnxcH9cyHWNE83L5w5EDleQRIq_CQ/exec';
+
+async function postToSheet(type, payload){
+  if(enWebApp()){
+    return await gasRun('guardarDatosServer', type, payload);
+  }
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify({type, ...payload})
+  });
+  return await res.json();
+}
+
+async function fetchFromSheet(){
+  if(enWebApp()){
+    return await gasRun('obtenerDatosServer');
+  }
+  // cache:'no-store' + timestamp único en la URL: evita que el navegador sirva una respuesta
+  // vieja guardada en caché, lo que haría creer a la app que está en una versión desactualizada.
+  const res = await fetch(APPS_SCRIPT_URL + '?data=1&_=' + Date.now(), {method: 'GET', cache: 'no-store'});
+  return await res.json();
+}
+
+// Detecta si la app corre desplegada como Web App de Apps Script (evita problemas de CORS usando google.script.run)
+// vs. abierta como archivo local (usa fetch directo, como antes)
+function enWebApp(){
+  return (typeof google !== 'undefined' && google.script && google.script.run);
+}
+function gasRun(fnName, ...args){
+  return new Promise((resolve, reject) => {
+    google.script.run
+      .withSuccessHandler(resolve)
+      .withFailureHandler(reject)
+      [fnName](...args);
+  });
+}
+
+function buildCostosItems(){
+  const items = [];
+  Object.keys(LINES).forEach(lineKey => {
+    const cfg = costosConfig[lineKey];
+    if(!cfg) return;
+    const def = LINES[lineKey];
+    def.parametros.forEach(f => items.push({lineaKey: lineKey, grupo: 'parametros', campoKey: f.key, etiqueta: f.label, valor: cfg.parametros[f.key]}));
+    def.costos.forEach(f => items.push({lineaKey: lineKey, grupo: 'costos', campoKey: f.key, etiqueta: f.label, valor: cfg.costos[f.key]}));
+    items.push({lineaKey: lineKey, grupo: 'margen', campoKey: 'margen', etiqueta: 'Margen', valor: cfg.margen});
+  });
+  return items;
+}
+
+// ---------- Estado ----------
+let stock = {};
+let stockFotos = {}; // fotos de los insumos fijos (cera, aceite, etc.), por key
+let aromas = [];
+let frascos = [];
+let materiales = [];
+let colorantes = [];
+let pabilos = [];
+let terminados = [];
+let costosConfig = {}; // { coco: {parametros:{}, costos:{}, margen}, adviento: {...}, concreto: {...} }
+let ventas = [];
+let compras = [];
+let datosListos = false;
+// Versión conocida de cada tipo de dato "sensible" (se sobrescribe completo al guardar).
+// Sirve para detectar si otro dispositivo/pestaña guardó cambios más nuevos antes que nosotros.
+let versions = {stock: 0, costos: 0, terminados: 0};
+let currentLine = 'coco';
+
+const fmt = (n) => new Intl.NumberFormat('es-CL').format(Math.round(n));
+const fmtDec = (n, d=1) => Number(n).toLocaleString('es-CL', {maximumFractionDigits:d, minimumFractionDigits:0});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+// Convierte un link compartido de Google Drive (o cualquier link de imagen) a un formato que sí se puede mostrar como imagen
+function normalizarFotoUrl(url){
+  if(!url) return '';
+  url = url.trim();
+  const m = url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+  if(m && url.includes('drive.google.com')){
+    return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w200`;
+  }
+  return url;
+}
+
+// Crea el elemento de miniatura de foto 100% vía DOM (createElement), sin ningún texto de
+// etiqueta HTML en el código, para evitar el bug del sanitizador de Apps Script.
+function crearThumbEl(foto, tipo, key, onClick){
+  const div = document.createElement('div');
+  div.className = foto ? 'insumo-thumb' : 'insumo-thumb vacio';
+  div.title = 'Click para poner/cambiar foto';
+  if(foto){
+    div.style.backgroundImage = 'url("' + normalizarFotoUrl(foto) + '")';
+    div.style.backgroundSize = 'cover';
+    div.style.backgroundPosition = 'center';
+  }
+  div.addEventListener('click', onClick);
+  return div;
+}
+
+function pedirFoto(actualUrl){
+  return prompt('Pega el link de la foto (link para compartir de Google Drive, o cualquier URL de imagen):', actualUrl || '');
+}
+
+// ---------- Storage helpers ----------
+async function loadAll(){
+  try{
+    const data = await fetchFromSheet();
+
+    stock = {...DEFAULT_STOCK};
+    stockFotos = {};
+    aromas = [];
+    frascos = [];
+    colorantes = [];
+    pabilos = [];
+    materiales = [];
+    (data.stock || []).forEach(row => {
+      if(!row.Key) return;
+      if(String(row.Key).startsWith('aroma_')){
+        aromas.push({key: row.Key, name: row.Insumo || 'Aroma', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
+      } else if(String(row.Key).startsWith('frasco_')){
+        frascos.push({key: row.Key, name: row.Insumo || 'Frasco', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
+      } else if(String(row.Key).startsWith('colorante_')){
+        colorantes.push({key: row.Key, name: row.Insumo || 'Colorante', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
+      } else if(String(row.Key).startsWith('pabilopar_')){
+        pabilos.push({key: row.Key, name: row.Insumo || 'Pabilo', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
+      } else if(String(row.Key).startsWith('material_')){
+        materiales.push({key: row.Key, name: row.Insumo || 'Material', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
+      } else {
+        stock[row.Key] = parseFloat(row.Cantidad) || 0;
+        if(row.Foto) stockFotos[row.Key] = row.Foto;
+      }
+    });
+    if(aromas.length === 0 && (data.stock || []).length === 0){
+      aromas = DEFAULT_AROMAS.map(a => ({...a}));
+      frascos = DEFAULT_FRASCOS.map(f => ({...f}));
+      colorantes = DEFAULT_COLORANTES.map(c => ({...c}));
+      pabilos = DEFAULT_PABILOS.map(p => ({...p}));
+    }
+    // Materiales generales es una categoría nueva: la sembramos la primera vez que se detecta
+    // vacía, aunque el resto del Sheet ya tenga datos (no solo en un Sheet totalmente nuevo).
+    if(materiales.length === 0){
+      materiales = DEFAULT_MATERIALES.map(m => ({...m}));
+    }
+
+    costosConfig = {};
+    (data.costos || []).forEach(row => {
+      const lineKey = row.LineaKey, grupo = row.Grupo, campoKey = row.CampoKey;
+      if(!lineKey) return;
+      if(!costosConfig[lineKey]) costosConfig[lineKey] = {parametros:{}, costos:{}, margen: 40};
+      if(grupo === 'margen') costosConfig[lineKey].margen = parseFloat(row.Valor) || 40;
+      else if(grupo === 'parametros') costosConfig[lineKey].parametros[campoKey] = parseFloat(row.Valor) || 0;
+      else if(grupo === 'costos') costosConfig[lineKey].costos[campoKey] = parseFloat(row.Valor) || 0;
+    });
+
+    ventas = (data.ventas || []).map(row => ({
+      id: String(row.ID),
+      fecha: row.Fecha,
+      linea: row.Linea,
+      producto: row.Producto,
+      cantidad: parseFloat(row.Cantidad) || 0,
+      precioUnit: parseFloat(row.PrecioUnit) || 0,
+      total: parseFloat(row.Total) || 0,
+      cliente: row.Cliente || ''
+    }));
+
+    terminados = (data.terminados || []).map(row => ({
+      key: row.Key,
+      linea: row.Linea,
+      variante: row.Variante,
+      qty: parseFloat(row.Cantidad) || 0
+    })).filter(t => t.key);
+
+    compras = (data.compras || []).map(row => ({
+      id: String(row.ID),
+      fecha: row.Fecha,
+      insumo: row.Insumo,
+      costoUnit: parseFloat(row.CostoUnit) || 0,
+      cantidad: parseFloat(row.Cantidad) || 0,
+      total: parseFloat(row.Total) || 0,
+      proveedor: row.Proveedor || ''
+    }));
+
+    versions = data.versions || {stock: 0, costos: 0, terminados: 0};
+    showToast('Datos cargados desde tu Sheet');
+    datosListos = true;
+  }catch(e){
+    console.warn('No se pudo conectar con el Sheet', e);
+    stock = {...DEFAULT_STOCK};
+    stockFotos = {};
+    aromas = DEFAULT_AROMAS.map(a => ({...a}));
+    frascos = DEFAULT_FRASCOS.map(f => ({...f}));
+    colorantes = DEFAULT_COLORANTES.map(c => ({...c}));
+    pabilos = DEFAULT_PABILOS.map(p => ({...p}));
+    materiales = DEFAULT_MATERIALES.map(m => ({...m}));
+    costosConfig = {};
+    ventas = [];
+    terminados = [];
+    compras = [];
+    datosListos = false;
+    mostrarBannerSinConexion();
+  }
+}
+
+function mostrarBannerSinConexion(){
+  if(document.getElementById('bannerSinConexion')) return;
+  const banner = document.createElement('div');
+  banner.id = 'bannerSinConexion';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:var(--rust);color:#fff;padding:14px 16px;text-align:center;font-size:14px;font-weight:600;z-index:9999;';
+  banner.innerHTML = 'No se pudo conectar con tu Google Sheet — los cambios NO se están guardando. <button onclick="location.reload()" style="margin-left:8px;background:#fff;color:var(--rust);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;">Reintentar</button>';
+  document.body.prepend(banner);
+}
+
+// Se muestra cuando otro dispositivo/pestaña guardó cambios más nuevos justo antes que nosotros.
+// Bloquea visualmente y obliga a recargar para no perder ni pisar datos de nadie.
+function mostrarBannerChoque(tipoKey, tipoLabel, versionActual, forzarFn){
+  const existente = document.getElementById('bannerChoque');
+  if(existente) existente.remove();
+  const banner = document.createElement('div');
+  banner.id = 'bannerChoque';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:var(--honey-deep);color:#fff;padding:14px 16px;text-align:center;font-size:14px;font-weight:600;z-index:9999;';
+  const btnForzar = document.createElement('button');
+  btnForzar.textContent = 'Guardar de todas formas';
+  btnForzar.style.cssText = 'margin-left:8px;background:#fff;color:var(--honey-deep);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;';
+  btnForzar.addEventListener('click', () => {
+    banner.remove();
+    versions[tipoKey] = versionActual;
+    forzarFn();
+  });
+  const btnRecargar = document.createElement('button');
+  btnRecargar.textContent = 'Recargar (recomendado)';
+  btnRecargar.style.cssText = 'margin-left:8px;background:#fff;color:var(--honey-deep);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;';
+  btnRecargar.addEventListener('click', () => location.reload());
+  banner.textContent = `⚠️ Se detectó un guardado con una versión distinta a la que tenías cargada de ${tipoLabel}. Si es un error, puedes forzar el guardado; si no, recarga para no perder nada de nadie.`;
+  banner.appendChild(btnRecargar);
+  banner.appendChild(btnForzar);
+  document.body.prepend(banner);
+}
+
+async function saveStockNow(){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{
+    const fixedItems = STOCK_ITEMS.map(i => ({key: i.key, name: i.name, qty: stock[i.key] || 0, unit: i.unit, foto: stockFotos[i.key] || ''}));
+    const aromaItems = aromas.map(a => ({key: a.key, name: a.name, qty: a.qty || 0, unit: 'ml', foto: a.foto || ''}));
+    const frascoItems = frascos.map(f => ({key: f.key, name: f.name, qty: f.qty || 0, unit: 'un', foto: f.foto || ''}));
+    const coloranteItems = colorantes.map(c => ({key: c.key, name: c.name, qty: c.qty || 0, unit: 'un', foto: c.foto || ''}));
+    const pabiloItems = pabilos.map(p => ({key: p.key, name: p.name, qty: p.qty || 0, unit: 'm', foto: p.foto || ''}));
+    const materialItems = materiales.map(m => ({key: m.key, name: m.name, qty: m.qty || 0, unit: 'un', foto: m.foto || ''}));
+    const resultado = await postToSheet('stock', {
+      items: [...fixedItems, ...aromaItems, ...frascoItems, ...coloranteItems, ...pabiloItems, ...materialItems],
+      versionEsperada: versions.stock
+    });
+    if(resultado && resultado.conflicto){
+      mostrarBannerChoque('stock', 'Stock', resultado.versionActual, () => saveStock());
+    } else if(resultado && typeof resultado.version === 'number'){
+      versions.stock = resultado.version;
+    }
+  }catch(e){ showToast('No se pudo guardar el stock (revisa tu internet)'); }
+}
+// Debounce + encadenado: si se llama varias veces seguidas (ej. clics rápidos en +/-), solo se
+// manda el último guardado. Además, cada guardado real espera a que el anterior haya terminado
+// del todo (incluida su respuesta) antes de leer versions.stock — si no, un segundo guardado
+// lanzado mientras el primero todavía viaja por internet leería una versión vieja y el servidor
+// lo rechazaría por error, pensando que fue otro dispositivo.
+let _saveStockTimer = null;
+let _stockSaveChain = Promise.resolve();
+function saveStock(){
+  return new Promise(resolve => {
+    clearTimeout(_saveStockTimer);
+    _saveStockTimer = setTimeout(() => {
+      _stockSaveChain = _stockSaveChain.then(() => saveStockNow()).then(resolve, resolve);
+    }, 400);
+  });
+}
+async function saveCostosNow(){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{
+    const resultado = await postToSheet('costos', {items: buildCostosItems(), versionEsperada: versions.costos});
+    if(resultado && resultado.conflicto){
+      mostrarBannerChoque('costos', 'Costos', resultado.versionActual, () => saveCostos());
+    } else if(resultado && typeof resultado.version === 'number'){
+      versions.costos = resultado.version;
+    }
+  }catch(e){ showToast('No se pudo guardar costos (revisa tu internet)'); }
+}
+let _costosSaveChain = Promise.resolve();
+function saveCostos(){
+  return _costosSaveChain = _costosSaveChain.then(() => saveCostosNow(), () => saveCostosNow());
+}
+async function saveTerminadosNow(){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{
+    const resultado = await postToSheet('terminados', {
+      items: terminados.map(t => ({key: t.key, linea: t.linea, variante: t.variante, qty: t.qty || 0})),
+      versionEsperada: versions.terminados
+    });
+    if(resultado && resultado.conflicto){
+      mostrarBannerChoque('terminados', 'Velas listas (Producción)', resultado.versionActual, () => saveTerminados());
+    } else if(resultado && typeof resultado.version === 'number'){
+      versions.terminados = resultado.version;
+    }
+  }catch(e){ showToast('No se pudo guardar velas listas (revisa tu internet)'); }
+}
+let _terminadosSaveChain = Promise.resolve();
+function saveTerminados(){
+  return _terminadosSaveChain = _terminadosSaveChain.then(() => saveTerminadosNow(), () => saveTerminadosNow());
+}
+
+// Calcula cuánta materia prima consume 1 unidad de una línea, dado su config de Costos
+function consumoPorUnidad(lineKey, aromaKey, frascoKey, coloranteKey, pabiloKey){
+  const cfg = costosConfig[lineKey];
+  const def = LINES[lineKey];
+  if(!cfg || !def) return {};
+  const derived = def.derived(cfg.parametros);
+  const consumo = {};
+  const ceraKey = (lineKey === 'coco') ? 'cera_coco' : 'cera_parafina';
+  consumo[ceraKey] = (consumo[ceraKey] || 0) + (derived.cera_g || 0) / 1000;
+
+  if(lineKey === 'coco'){
+    consumo['pabilo_coco'] = (consumo['pabilo_coco'] || 0) + (cfg.parametros.pabilo_cm || 0) / 100;
+  } else if(pabiloKey){
+    consumo[pabiloKey] = (consumo[pabiloKey] || 0) + (cfg.parametros.pabilo_cm || 0) / 100;
+  }
+
+  if(lineKey === 'coco' && aromaKey){
+    consumo[aromaKey] = (consumo[aromaKey] || 0) + (cfg.parametros.aroma_ml || 0);
+  }
+  if(lineKey === 'coco' && frascoKey){
+    consumo[frascoKey] = (consumo[frascoKey] || 0) + 1;
+  }
+  if(lineKey === 'adviento' && coloranteKey){
+    consumo[coloranteKey] = (consumo[coloranteKey] || 0) + (derived.cera_g || 0) / 1000;
+  }
+
+  const fija = RECETA_FIJA[lineKey] || {};
+  Object.keys(fija).forEach(k => { consumo[k] = (consumo[k] || 0) + fija[k]; });
+
+  return consumo;
+}
+
+function stockKeyLabel(key){
+  const item = STOCK_ITEMS.find(i => i.key === key);
+  if(item) return item.name;
+  const aroma = aromas.find(a => a.key === key);
+  if(aroma) return 'Aroma ' + aroma.name;
+  const frasco = frascos.find(f => f.key === key);
+  if(frasco) return 'Frasco ' + frasco.name;
+  const colorante = colorantes.find(c => c.key === key);
+  if(colorante) return 'Colorante ' + colorante.name;
+  const pabilo = pabilos.find(p => p.key === key);
+  if(pabilo) return 'Pabilo ' + pabilo.name;
+  return key;
+}
+
+function disponibleDe(key){
+  const aroma = aromas.find(a=>a.key===key);
+  if(aroma) return aroma.qty || 0;
+  const frasco = frascos.find(f=>f.key===key);
+  if(frasco) return frasco.qty || 0;
+  const colorante = colorantes.find(c=>c.key===key);
+  if(colorante) return colorante.qty || 0;
+  const pabilo = pabilos.find(p=>p.key===key);
+  if(pabilo) return pabilo.qty || 0;
+  return stock[key] || 0;
+}
+
+function descontarDe(key, cantidad){
+  const aroma = aromas.find(a => a.key === key);
+  const frasco = frascos.find(f => f.key === key);
+  const colorante = colorantes.find(c => c.key === key);
+  const pabilo = pabilos.find(p => p.key === key);
+  if(aroma){ aroma.qty = Math.max(0, Math.round((aroma.qty - cantidad) * 100) / 100); }
+  else if(frasco){ frasco.qty = Math.max(0, Math.round((frasco.qty - cantidad) * 100) / 100); }
+  else if(colorante){ colorante.qty = Math.max(0, Math.round((colorante.qty - cantidad) * 100) / 100); }
+  else if(pabilo){ pabilo.qty = Math.max(0, Math.round((pabilo.qty - cantidad) * 100) / 100); }
+  else{ stock[key] = Math.max(0, Math.round(((stock[key]||0) - cantidad) * 100) / 100); }
+}
+
+async function producirVela({linea, aromaKey, frascoKey, coloranteKey, pabiloKey, variante, cantidad}){
+  if(!cantidad || cantidad <= 0){ showToast('Ingresa una cantidad válida'); return; }
+  ensureLineConfig(linea);
+  const consumo = consumoPorUnidad(linea, aromaKey, frascoKey, coloranteKey, pabiloKey);
+
+  // Revisar si alcanza el stock
+  const faltantes = [];
+  Object.keys(consumo).forEach(key => {
+    const necesario = consumo[key] * cantidad;
+    const disponible = disponibleDe(key);
+    if(necesario > disponible + 0.001) faltantes.push(`${stockKeyLabel(key)} (te faltan ${fmtDec(necesario-disponible)} ${key.includes('cera')?'kg':(key.startsWith('aroma')?'ml':'')})`);
+  });
+  if(faltantes.length > 0){
+    showToast('Ojo: no te alcanza ' + faltantes[0] + (faltantes.length>1?` y ${faltantes.length-1} más`:''));
+  }
+
+  // Descontar materia prima (deja en 0 si no alcanza, no permite negativo)
+  Object.keys(consumo).forEach(key => {
+    descontarDe(key, consumo[key] * cantidad);
+  });
+
+  // Sumar al stock de velas listas (agrupado por línea + variante)
+  const variantKey = linea + '::' + variante.toLowerCase().trim();
+  let t = terminados.find(x => x.key === variantKey);
+  if(!t){
+    t = {key: variantKey, linea, variante, qty: 0};
+    terminados.push(t);
+  }
+  t.qty += cantidad;
+
+  await saveStock();
+  await saveTerminados();
+  renderStock();
+  renderProduccion();
+  renderVentas();
+  showToast(`¡Producidas ${fmtDec(cantidad,0)} unidades!`);
+}
+
+async function saveVentaNueva(venta){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{ await postToSheet('venta', venta); }
+  catch(e){ showToast('No se pudo guardar la venta (revisa tu internet)'); }
+}
+async function saveVentaEliminada(id){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{ await postToSheet('venta_delete', {id}); }
+  catch(e){ showToast('No se pudo eliminar en el Sheet'); }
+}
+
+async function saveCompraNueva(compra){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{ await postToSheet('compra', compra); }
+  catch(e){ showToast('No se pudo guardar la compra (revisa tu internet)'); }
+}
+async function saveCompraEliminada(id){
+  if(!datosListos){ mostrarBannerSinConexion(); return; }
+  try{ await postToSheet('compra_delete', {id}); }
+  catch(e){ showToast('No se pudo eliminar en el Sheet'); }
+}
+
+// ---------- Render: STOCK ----------
+function renderStock(){
+  const list = document.getElementById('stockList');
+  list.innerHTML = '';
+  const grouped = {coco:[], parafina:[]};
+  STOCK_ITEMS.forEach(item => grouped[item.line].push(item));
+
+  const buildGroup = (title, dotClass, items, lineKey) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML = `<div class="card-header"><span class="dot ${dotClass}"></span>${title}</div>`;
+
+    items.forEach(item => {
+      const qty = stock[item.key] ?? 0;
+      const pct = Math.max(4, Math.min(100, (qty/item.ref)*100));
+      const isLow = qty <= item.low;
+      const div = document.createElement('div');
+      div.className = 'stock-item';
+      div.innerHTML = `
+        <div class="stock-row has-thumb">
+          <span class="stock-name">${item.name}${isLow ? ' <span class="low-tag">bajo</span>' : ''}</span>
+          <div class="stock-controls">
+            <button class="qtybtn" data-act="minus" data-key="${item.key}">−</button>
+            <input type="number" step="any" data-key="${item.key}" value="${qty}">
+            <span class="unit-label">${item.unit}</span>
+            <button class="qtybtn" data-act="plus" data-key="${item.key}">+</button>
+          </div>
+        </div>
+        <div class="bar-track"><div class="bar-fill ${item.line}" style="width:${pct}%"></div></div>
+      `;
+      const thumbFijo = crearThumbEl(stockFotos[item.key], 'stock', item.key, () => {
+        const url = pedirFoto(stockFotos[item.key]);
+        if(url === null) return;
+        stockFotos[item.key] = url.trim();
+        renderStock();
+        saveStock();
+      });
+      div.querySelector('.stock-row').insertBefore(thumbFijo, div.querySelector('.stock-name'));
+      wrap.appendChild(div);
+    });
+
+    if(lineKey === 'coco'){
+      const aromasBlock = document.createElement('div');
+      aromasBlock.className = 'aroma-block';
+      aromasBlock.innerHTML = `<div class="aroma-title">Aromas</div>`;
+      aromas.forEach(aroma => {
+        const isLow = (aroma.qty||0) <= 60;
+        const pct = Math.max(4, Math.min(100, ((aroma.qty||0)/400)*100));
+        const row = document.createElement('div');
+        row.className = 'stock-item aroma-item';
+        row.innerHTML = `
+          <div class="stock-row has-thumb">
+            <input type="text" class="aroma-name-input" data-akey="${aroma.key}" value="${aroma.name}">
+            <div class="stock-controls">
+              ${isLow ? '<span class="low-tag">bajo</span>' : ''}
+              <button class="qtybtn" data-aact="minus" data-akey="${aroma.key}">−</button>
+              <input type="number" step="any" class="aroma-qty-input" data-akey="${aroma.key}" value="${aroma.qty}">
+              <span class="unit-label">ml</span>
+              <button class="qtybtn" data-aact="plus" data-akey="${aroma.key}">+</button>
+              <button class="aroma-del" data-akey="${aroma.key}">eliminar</button>
+            </div>
+          </div>
+          <div class="bar-track"><div class="bar-fill coco" style="width:${pct}%"></div></div>
+        `;
+        const thumbA = crearThumbEl(aroma.foto, 'a', aroma.key, () => {
+          const url = pedirFoto(aroma.foto);
+          if(url === null) return;
+          aroma.foto = url.trim();
+          renderStock();
+          saveStock();
+        });
+        row.querySelector('.stock-row').insertBefore(thumbA, row.querySelector('.aroma-name-input'));
+        aromasBlock.appendChild(row);
+      });
+      const addBtn = document.createElement('button');
+      addBtn.className = 'aroma-add';
+      addBtn.textContent = '+ Agregar aroma';
+      aromasBlock.appendChild(addBtn);
+      wrap.appendChild(aromasBlock);
+
+      addBtn.addEventListener('click', () => {
+        aromas.push({key: 'aroma_' + Date.now().toString(36), name: 'Nuevo aroma', qty: 0});
+        renderStock();
+        saveStock();
+      });
+      aromasBlock.querySelectorAll('.aroma-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          aromas = aromas.filter(a => a.key !== btn.dataset.akey);
+          renderStock();
+          saveStock();
+        });
+      });
+      aromasBlock.querySelectorAll('.aroma-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const a = aromas.find(x => x.key === inp.dataset.akey);
+          if(a) a.name = inp.value.trim() || 'Aroma';
+          saveStock();
+        });
+      });
+      aromasBlock.querySelectorAll('.aroma-qty-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const a = aromas.find(x => x.key === inp.dataset.akey);
+          if(a) a.qty = Math.max(0, parseFloat(inp.value) || 0);
+          renderStock();
+          saveStock();
+        });
+      });
+      aromasBlock.querySelectorAll('[data-aact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const a = aromas.find(x => x.key === btn.dataset.akey);
+          if(!a) return;
+          const delta = btn.dataset.aact === 'plus' ? 10 : -10;
+          a.qty = Math.max(0, Math.round(((a.qty||0) + delta) * 100) / 100);
+          renderStock();
+          saveStock();
+        });
+      });
+    } else if(lineKey === 'frascos'){
+      const frascosBlock = document.createElement('div');
+      frascosBlock.className = 'aroma-block frasco-block';
+      frascosBlock.innerHTML = `<div class="aroma-title frasco-title">Frascos</div>`;
+      frascos.forEach(frasco => {
+        const isLow = (frasco.qty||0) <= 10;
+        const pct = Math.max(4, Math.min(100, ((frasco.qty||0)/100)*100));
+        const row = document.createElement('div');
+        row.className = 'stock-item aroma-item';
+        row.innerHTML = `
+          <div class="stock-row has-thumb">
+            <input type="text" class="frasco-name-input" data-fkey="${frasco.key}" value="${frasco.name}">
+            <div class="stock-controls">
+              ${isLow ? '<span class="low-tag">bajo</span>' : ''}
+              <button class="qtybtn" data-fact="minus" data-fkey="${frasco.key}">−</button>
+              <input type="number" step="any" class="frasco-qty-input" data-fkey="${frasco.key}" value="${frasco.qty}">
+              <span class="unit-label">un</span>
+              <button class="qtybtn" data-fact="plus" data-fkey="${frasco.key}">+</button>
+              <button class="aroma-del" data-fkey="${frasco.key}">eliminar</button>
+            </div>
+          </div>
+          <div class="bar-track"><div class="bar-fill coco" style="width:${pct}%"></div></div>
+        `;
+        const thumbF = crearThumbEl(frasco.foto, 'f', frasco.key, () => {
+          const url = pedirFoto(frasco.foto);
+          if(url === null) return;
+          frasco.foto = url.trim();
+          renderStock();
+          saveStock();
+        });
+        row.querySelector('.stock-row').insertBefore(thumbF, row.querySelector('.frasco-name-input'));
+        frascosBlock.appendChild(row);
+      });
+      const addFrascoBtn = document.createElement('button');
+      addFrascoBtn.className = 'aroma-add';
+      addFrascoBtn.textContent = '+ Agregar frasco';
+      frascosBlock.appendChild(addFrascoBtn);
+      wrap.appendChild(frascosBlock);
+
+      addFrascoBtn.addEventListener('click', () => {
+        frascos.push({key: 'frasco_' + Date.now().toString(36), name: 'Nuevo frasco (tamaño/color)', qty: 0});
+        renderStock();
+        saveStock();
+      });
+      frascosBlock.querySelectorAll('.aroma-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          frascos = frascos.filter(f => f.key !== btn.dataset.fkey);
+          renderStock();
+          saveStock();
+        });
+      });
+      frascosBlock.querySelectorAll('.frasco-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const f = frascos.find(x => x.key === inp.dataset.fkey);
+          if(f) f.name = inp.value.trim() || 'Frasco';
+          saveStock();
+        });
+      });
+      frascosBlock.querySelectorAll('.frasco-qty-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const f = frascos.find(x => x.key === inp.dataset.fkey);
+          if(f) f.qty = Math.max(0, parseFloat(inp.value) || 0);
+          renderStock();
+          saveStock();
+        });
+      });
+      frascosBlock.querySelectorAll('[data-fact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const f = frascos.find(x => x.key === btn.dataset.fkey);
+          if(!f) return;
+          const delta = btn.dataset.fact === 'plus' ? 5 : -5;
+          f.qty = Math.max(0, Math.round(((f.qty||0) + delta) * 100) / 100);
+          renderStock();
+          saveStock();
+        });
+      });
+
+      const materialesBlock = document.createElement('div');
+      materialesBlock.className = 'aroma-block material-block';
+      materialesBlock.innerHTML = `<div class="aroma-title material-title">Materiales generales</div>`;
+      materiales.forEach(mat => {
+        const isLow = (mat.qty||0) <= 10;
+        const pct = Math.max(4, Math.min(100, ((mat.qty||0)/100)*100));
+        const row = document.createElement('div');
+        row.className = 'stock-item aroma-item';
+        row.innerHTML = `
+          <div class="stock-row has-thumb">
+            <input type="text" class="material-name-input" data-mkey="${mat.key}" value="${mat.name}">
+            <div class="stock-controls">
+              ${isLow ? '<span class="low-tag">bajo</span>' : ''}
+              <button class="qtybtn" data-mact="minus" data-mkey="${mat.key}">−</button>
+              <input type="number" step="any" class="material-qty-input" data-mkey="${mat.key}" value="${mat.qty}">
+              <span class="unit-label">un</span>
+              <button class="qtybtn" data-mact="plus" data-mkey="${mat.key}">+</button>
+              <button class="aroma-del" data-mkey="${mat.key}">eliminar</button>
+            </div>
+          </div>
+          <div class="bar-track"><div class="bar-fill coco" style="width:${pct}%"></div></div>
+        `;
+        const thumbM = crearThumbEl(mat.foto, 'm', mat.key, () => {
+          const url = pedirFoto(mat.foto);
+          if(url === null) return;
+          mat.foto = url.trim();
+          renderStock();
+          saveStock();
+        });
+        row.querySelector('.stock-row').insertBefore(thumbM, row.querySelector('.material-name-input'));
+        materialesBlock.appendChild(row);
+      });
+      const addMaterialBtn = document.createElement('button');
+      addMaterialBtn.className = 'aroma-add';
+      addMaterialBtn.textContent = '+ Agregar material';
+      materialesBlock.appendChild(addMaterialBtn);
+      wrap.appendChild(materialesBlock);
+
+      addMaterialBtn.addEventListener('click', () => {
+        materiales.push({key: 'material_' + Date.now().toString(36), name: 'Nuevo material', qty: 0});
+        renderStock();
+        saveStock();
+      });
+      materialesBlock.querySelectorAll('.aroma-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          materiales = materiales.filter(m => m.key !== btn.dataset.mkey);
+          renderStock();
+          saveStock();
+        });
+      });
+      materialesBlock.querySelectorAll('.material-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const m = materiales.find(x => x.key === inp.dataset.mkey);
+          if(m) m.name = inp.value.trim() || 'Material';
+          saveStock();
+        });
+      });
+      materialesBlock.querySelectorAll('.material-qty-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const m = materiales.find(x => x.key === inp.dataset.mkey);
+          if(m) m.qty = Math.max(0, parseFloat(inp.value) || 0);
+          renderStock();
+          saveStock();
+        });
+      });
+      materialesBlock.querySelectorAll('[data-mact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const m = materiales.find(x => x.key === btn.dataset.mkey);
+          if(!m) return;
+          const delta = btn.dataset.mact === 'plus' ? 5 : -5;
+          m.qty = Math.max(0, Math.round(((m.qty||0) + delta) * 100) / 100);
+          renderStock();
+          saveStock();
+        });
+      });
+    } else if(lineKey === 'parafina'){
+      const colorantesBlock = document.createElement('div');
+      colorantesBlock.className = 'aroma-block colorante-block';
+      colorantesBlock.innerHTML = `<div class="aroma-title colorante-title">Colorantes</div>`;
+      colorantes.forEach(col => {
+        const isLow = (col.qty||0) <= 2;
+        const pct = Math.max(4, Math.min(100, ((col.qty||0)/10)*100));
+        const row = document.createElement('div');
+        row.className = 'stock-item aroma-item';
+        row.innerHTML = `
+          <div class="stock-row has-thumb">
+            <input type="text" class="colorante-name-input" data-ckey="${col.key}" value="${col.name}">
+            <div class="stock-controls">
+              ${isLow ? '<span class="low-tag">bajo</span>' : ''}
+              <button class="qtybtn" data-cact="minus" data-ckey="${col.key}">−</button>
+              <input type="number" step="any" class="colorante-qty-input" data-ckey="${col.key}" value="${col.qty}">
+              <span class="unit-label">un</span>
+              <button class="qtybtn" data-cact="plus" data-ckey="${col.key}">+</button>
+              <button class="aroma-del" data-ckey="${col.key}">eliminar</button>
+            </div>
+          </div>
+          <div class="bar-track"><div class="bar-fill parafina" style="width:${pct}%"></div></div>
+        `;
+        const thumbC = crearThumbEl(col.foto, 'c', col.key, () => {
+          const url = pedirFoto(col.foto);
+          if(url === null) return;
+          col.foto = url.trim();
+          renderStock();
+          saveStock();
+        });
+        row.querySelector('.stock-row').insertBefore(thumbC, row.querySelector('.colorante-name-input'));
+        colorantesBlock.appendChild(row);
+      });
+      const addColoranteBtn = document.createElement('button');
+      addColoranteBtn.className = 'aroma-add';
+      addColoranteBtn.textContent = '+ Agregar colorante';
+      colorantesBlock.appendChild(addColoranteBtn);
+      wrap.appendChild(colorantesBlock);
+
+      addColoranteBtn.addEventListener('click', () => {
+        colorantes.push({key: 'colorante_' + Date.now().toString(36), name: 'Nuevo colorante', qty: 0});
+        renderStock();
+        saveStock();
+      });
+      colorantesBlock.querySelectorAll('.aroma-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          colorantes = colorantes.filter(c => c.key !== btn.dataset.ckey);
+          renderStock();
+          saveStock();
+        });
+      });
+      colorantesBlock.querySelectorAll('.colorante-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const c = colorantes.find(x => x.key === inp.dataset.ckey);
+          if(c) c.name = inp.value.trim() || 'Colorante';
+          saveStock();
+        });
+      });
+      colorantesBlock.querySelectorAll('.colorante-qty-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const c = colorantes.find(x => x.key === inp.dataset.ckey);
+          if(c) c.qty = Math.max(0, parseFloat(inp.value) || 0);
+          renderStock();
+          saveStock();
+        });
+      });
+      colorantesBlock.querySelectorAll('[data-cact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const c = colorantes.find(x => x.key === btn.dataset.ckey);
+          if(!c) return;
+          const delta = btn.dataset.cact === 'plus' ? 1 : -1;
+          c.qty = Math.max(0, Math.round(((c.qty||0) + delta) * 100) / 100);
+          renderStock();
+          saveStock();
+        });
+      });
+
+      const pabilosBlock = document.createElement('div');
+      pabilosBlock.className = 'aroma-block pabilo-block';
+      pabilosBlock.innerHTML = `<div class="aroma-title pabilo-title">Pabilos</div>`;
+      pabilos.forEach(pab => {
+        const isLow = (pab.qty||0) <= 1;
+        const pct = Math.max(4, Math.min(100, ((pab.qty||0)/13.5)*100));
+        const row = document.createElement('div');
+        row.className = 'stock-item aroma-item';
+        row.innerHTML = `
+          <div class="stock-row has-thumb">
+            <input type="text" class="pabilo-name-input" data-pkey="${pab.key}" value="${pab.name}">
+            <div class="stock-controls">
+              ${isLow ? '<span class="low-tag">bajo</span>' : ''}
+              <button class="qtybtn" data-pact="minus" data-pkey="${pab.key}">−</button>
+              <input type="number" step="any" class="pabilo-qty-input" data-pkey="${pab.key}" value="${pab.qty}">
+              <span class="unit-label">m</span>
+              <button class="qtybtn" data-pact="plus" data-pkey="${pab.key}">+</button>
+              <button class="aroma-del" data-pkey="${pab.key}">eliminar</button>
+            </div>
+          </div>
+          <div class="bar-track"><div class="bar-fill parafina" style="width:${pct}%"></div></div>
+        `;
+        const thumbP = crearThumbEl(pab.foto, 'p', pab.key, () => {
+          const url = pedirFoto(pab.foto);
+          if(url === null) return;
+          pab.foto = url.trim();
+          renderStock();
+          saveStock();
+        });
+        row.querySelector('.stock-row').insertBefore(thumbP, row.querySelector('.pabilo-name-input'));
+        pabilosBlock.appendChild(row);
+      });
+      const addPabiloBtn = document.createElement('button');
+      addPabiloBtn.className = 'aroma-add';
+      addPabiloBtn.textContent = '+ Agregar pabilo';
+      pabilosBlock.appendChild(addPabiloBtn);
+      wrap.appendChild(pabilosBlock);
+
+      addPabiloBtn.addEventListener('click', () => {
+        pabilos.push({key: 'pabilopar_' + Date.now().toString(36), name: 'Nuevo pabilo', qty: 0});
+        renderStock();
+        saveStock();
+      });
+      pabilosBlock.querySelectorAll('.aroma-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pabilos = pabilos.filter(p => p.key !== btn.dataset.pkey);
+          renderStock();
+          saveStock();
+        });
+      });
+      pabilosBlock.querySelectorAll('.pabilo-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const p = pabilos.find(x => x.key === inp.dataset.pkey);
+          if(p) p.name = inp.value.trim() || 'Pabilo';
+          saveStock();
+        });
+      });
+      pabilosBlock.querySelectorAll('.pabilo-qty-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const p = pabilos.find(x => x.key === inp.dataset.pkey);
+          if(p) p.qty = Math.max(0, parseFloat(inp.value) || 0);
+          renderStock();
+          saveStock();
+        });
+      });
+      pabilosBlock.querySelectorAll('[data-pact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = pabilos.find(x => x.key === btn.dataset.pkey);
+          if(!p) return;
+          const delta = btn.dataset.pact === 'plus' ? 0.5 : -0.5;
+          p.qty = Math.max(0, Math.round(((p.qty||0) + delta) * 100) / 100);
+          renderStock();
+          saveStock();
+        });
+      });
+    }
+
+    return wrap;
+  };
+
+  list.appendChild(buildGroup('Línea cera de coco', 'coco', grouped.coco, 'coco'));
+  list.appendChild(buildGroup('Frascos', 'coco', [], 'frascos'));
+  list.appendChild(buildGroup('Línea cera de parafina', 'parafina', grouped.parafina, 'parafina'));
+
+  list.querySelectorAll('.qtybtn[data-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.key;
+      const item = STOCK_ITEMS.find(i=>i.key===key);
+      const delta = btn.dataset.act === 'plus' ? item.step : -item.step;
+      stock[key] = Math.max(0, Math.round(((stock[key]||0) + delta) * 100) / 100);
+      renderStock();
+      saveStock();
+    });
+  });
+  list.querySelectorAll('input[type=number][data-key]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const key = inp.dataset.key;
+      stock[key] = Math.max(0, parseFloat(inp.value) || 0);
+      renderStock();
+      saveStock();
+    });
+  });
+}
+
+// ---------- Render: COSTOS ----------
+function ensureLineConfig(lineKey){
+  if(!costosConfig[lineKey]){
+    const def = LINES[lineKey];
+    const parametros = {};
+    def.parametros.forEach(f => parametros[f.key] = f.def);
+    const costos = {};
+    def.costos.forEach(f => costos[f.key] = f.def);
+    costosConfig[lineKey] = {parametros, costos, margen: 40};
+  }
+}
+
+function renderLineSwitch(){
+  const el = document.getElementById('lineSwitch');
+  el.innerHTML = '';
+  Object.keys(LINES).forEach(key => {
+    const btn = document.createElement('button');
+    btn.textContent = LINES[key].label;
+    if(key === currentLine) btn.classList.add('active');
+    btn.addEventListener('click', () => { currentLine = key; renderCostos(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderCostos(){
+  renderLineSwitch();
+  ensureLineConfig(currentLine);
+  const cfg = costosConfig[currentLine];
+  const def = LINES[currentLine];
+  const body = document.getElementById('costosBody');
+
+  const paramFieldsHtml = def.parametros.map(f => `
+    <div class="field-row">
+      <label>${f.label}</label>
+      <div class="input-wrap">
+        <input type="number" step="any" data-group="parametros" data-field="${f.key}" value="${cfg.parametros[f.key]}">
+        <span class="unit-label">${f.unit}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const costFieldsHtml = def.costos.map(f => `
+    <div class="field-row">
+      <label>${f.label}</label>
+      <div class="input-wrap">
+        <input type="number" step="any" data-group="costos" data-field="${f.key}" value="${cfg.costos[f.key]}">
+        <span class="unit-label">${f.unit}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const margen = cfg.margen ?? 40;
+
+  let derivedNote = '';
+  if(currentLine === 'coco'){
+    derivedNote = `<div class="muted" id="derivedNoteWrap" style="margin-top:-2px;margin-bottom:12px;">→ equivale a <strong id="derivedNoteVal">0</strong> g de cera de coco por vela</div>`;
+  }
+
+  body.innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="dot ${def.dotClass}"></span>Parámetros de la vela</div>
+      ${paramFieldsHtml}
+      ${derivedNote}
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="dot ${def.dotClass}"></span>Costo de insumos</div>
+      ${costFieldsHtml}
+      <div class="divider"></div>
+      <div class="field-row">
+        <label>Margen deseado</label>
+        <div class="input-wrap"><span class="unit-label" id="margenLabel" style="width:auto;font-weight:700;color:var(--charcoal);">${margen}%</span></div>
+      </div>
+      <input type="range" class="margin-slider" id="marginSlider" min="0" max="80" step="5" value="${margen}">
+      <div class="result-box">
+        <div class="result-line"><span>Costo unitario</span><span class="val" id="costoUnitVal">$0</span></div>
+        <div class="result-line"><span>Ganancia estimada</span><span class="val" id="gananciaVal">$0</span></div>
+        <div class="result-line total"><span>Precio sugerido</span><span class="val" id="precioSugeridoVal">$0</span></div>
+      </div>
+    </div>
+  `;
+
+  body.querySelectorAll('input[data-field]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const group = inp.dataset.group;
+      cfg[group][inp.dataset.field] = parseFloat(inp.value) || 0;
+      updateCostosResult();
+    });
+    inp.addEventListener('change', () => saveCostos());
+  });
+  const slider = document.getElementById('marginSlider');
+  slider.addEventListener('input', () => {
+    cfg.margen = parseInt(slider.value);
+    document.getElementById('margenLabel').textContent = `${cfg.margen}%`;
+    updateCostosResult();
+  });
+  slider.addEventListener('change', () => saveCostos());
+
+  updateCostosResult();
+}
+
+// Actualiza solo los números calculados, sin re-crear los inputs (así no se pierde el foco al escribir)
+function updateCostosResult(){
+  const cfg = costosConfig[currentLine];
+  const def = LINES[currentLine];
+  const derived = def.derived(cfg.parametros);
+  const costoUnit = def.calc(cfg.parametros, cfg.costos, derived);
+  const margen = cfg.margen ?? 40;
+  const precioSugerido = costoUnit / (1 - margen/100);
+  const ganancia = precioSugerido - costoUnit;
+
+  const elCosto = document.getElementById('costoUnitVal');
+  const elGanancia = document.getElementById('gananciaVal');
+  const elPrecio = document.getElementById('precioSugeridoVal');
+  if(elCosto) elCosto.textContent = `$${fmt(costoUnit)}`;
+  if(elGanancia) elGanancia.textContent = `$${fmt(ganancia)}`;
+  if(elPrecio) elPrecio.textContent = `$${fmt(precioSugerido)}`;
+
+  if(currentLine === 'coco'){
+    const elDerived = document.getElementById('derivedNoteVal');
+    if(elDerived) elDerived.textContent = fmtDec(derived.cera_g, 0);
+  }
+}
+
+// ---------- Render: PRODUCCIÓN ----------
+function updateAromaVisibility(){
+  const linea = document.getElementById('pLinea').value;
+  const wrap = document.getElementById('pAromaWrap');
+  const frascoWrap = document.getElementById('pFrascoWrap');
+  const coloranteWrap = document.getElementById('pColoranteWrap');
+  const pabiloWrap = document.getElementById('pPabiloWrap');
+
+  const poblarPabilo = () => {
+    pabiloWrap.style.display = 'block';
+    const selP = document.getElementById('pPabilo');
+    selP.innerHTML = pabilos.map(p => `<option value="${p.key}">${p.name} (${fmtDec(p.qty,0)} m disp.)</option>`).join('')
+      || '<option value="">Sin pabilos cargados</option>';
+  };
+
+  if(linea === 'coco'){
+    wrap.style.display = 'block';
+    const sel = document.getElementById('pAroma');
+    sel.innerHTML = aromas.map(a => `<option value="${a.key}">${a.name} (${fmtDec(a.qty,0)} ml disp.)</option>`).join('')
+      || '<option value="">Sin aromas cargados</option>';
+
+    frascoWrap.style.display = 'block';
+    const selF = document.getElementById('pFrasco');
+    selF.innerHTML = frascos.map(f => `<option value="${f.key}">${f.name} (${fmtDec(f.qty,0)} disp.)</option>`).join('')
+      || '<option value="">Sin frascos cargados</option>';
+
+    coloranteWrap.style.display = 'none';
+    pabiloWrap.style.display = 'none';
+  } else if(linea === 'adviento'){
+    wrap.style.display = 'none';
+    frascoWrap.style.display = 'none';
+
+    coloranteWrap.style.display = 'block';
+    const selC = document.getElementById('pColorante');
+    selC.innerHTML = colorantes.map(c => `<option value="${c.key}">${c.name} (${fmtDec(c.qty,0)} disp.)</option>`).join('')
+      || '<option value="">Sin colorantes cargados</option>';
+
+    poblarPabilo();
+  } else {
+    wrap.style.display = 'none';
+    frascoWrap.style.display = 'none';
+    coloranteWrap.style.display = 'none';
+
+    poblarPabilo();
+  }
+}
+document.getElementById('pLinea').addEventListener('change', updateAromaVisibility);
+
+function renderProduccion(){
+  updateAromaVisibility();
+  const list = document.getElementById('terminadosList');
+  if(terminados.length === 0){
+    list.innerHTML = '<div class="empty">Aún no has registrado producción.<br>Usa el formulario de arriba.</div>';
+    return;
+  }
+  const orden = {coco:0, adviento:1, concreto:2};
+  const sorted = [...terminados].sort((a,b)=> (orden[a.linea]??9) - (orden[b.linea]??9));
+  list.innerHTML = sorted.map(t => `
+    <div class="venta-item">
+      <div>
+        <div class="prod">${t.variante}</div>
+        <div class="meta">${LINES[t.linea]?.label || t.linea}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="amt">${fmtDec(t.qty,0)}</span>
+        <button class="del" data-key="${t.key}">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      terminados = terminados.filter(t => t.key !== btn.dataset.key);
+      saveTerminados();
+      renderProduccion();
+      renderVentas();
+    });
+  });
+}
+
+document.getElementById('btnProducir').addEventListener('click', () => {
+  const linea = document.getElementById('pLinea').value;
+  const aromaKey = linea === 'coco' ? document.getElementById('pAroma').value : null;
+  const frascoKey = linea === 'coco' ? document.getElementById('pFrasco').value : null;
+  const coloranteKey = linea === 'adviento' ? document.getElementById('pColorante').value : null;
+  const pabiloKey = linea !== 'coco' ? document.getElementById('pPabilo').value : null;
+  const aromaNombre = aromas.find(a=>a.key===aromaKey)?.name;
+  const frascoNombre = frascos.find(f=>f.key===frascoKey)?.name;
+  const coloranteNombre = colorantes.find(c=>c.key===coloranteKey)?.name;
+  let sugerido = null;
+  if(linea === 'coco') sugerido = [frascoNombre, aromaNombre].filter(Boolean).join(' · ');
+  if(linea === 'adviento') sugerido = coloranteNombre;
+  const variante = document.getElementById('pVariante').value.trim() || sugerido || 'Sin variante';
+  const cantidad = parseFloat(document.getElementById('pCantidad').value) || 0;
+
+  const varianteCompleta = `${LINES[linea].label} · ${variante}`;
+  producirVela({linea, aromaKey, frascoKey, coloranteKey, pabiloKey, variante: varianteCompleta, cantidad});
+
+  document.getElementById('pVariante').value = '';
+  document.getElementById('pCantidad').value = 1;
+});
+
+// ---------- Render: COMPRAS ----------
+function listaInsumosCompra(){
+  const opciones = [];
+  STOCK_ITEMS.forEach(i => opciones.push({key: i.key, label: `${i.name} (${i.unit})`, tipo:'stock'}));
+  aromas.forEach(a => opciones.push({key: a.key, label: `Aroma ${a.name} (ml)`, tipo:'aroma'}));
+  frascos.forEach(f => opciones.push({key: f.key, label: `Frasco ${f.name} (un)`, tipo:'frasco'}));
+  colorantes.forEach(c => opciones.push({key: c.key, label: `Colorante ${c.name} (un)`, tipo:'colorante'}));
+  pabilos.forEach(p => opciones.push({key: p.key, label: `Pabilo ${p.name} (m)`, tipo:'pabilo'}));
+  opciones.push({key: '__otro__', label: 'Otro insumo (no suma a Stock)', tipo:'otro'});
+  return opciones;
+}
+
+function poblarSelectCompra(){
+  const sel = document.getElementById('cInsumo');
+  const valorActual = sel.value;
+  sel.innerHTML = listaInsumosCompra().map(o => `<option value="${o.key}">${o.label}</option>`).join('');
+  if(valorActual) sel.value = valorActual;
+  toggleInsumoOtro();
+}
+
+function toggleInsumoOtro(){
+  const esOtro = document.getElementById('cInsumo').value === '__otro__';
+  document.getElementById('cInsumoOtro').style.display = esOtro ? 'block' : 'none';
+}
+document.getElementById('cInsumo').addEventListener('change', toggleInsumoOtro);
+
+function actualizarMontoCompra(){
+  const cant = parseFloat(document.getElementById('cCantidad').value) || 0;
+  const costo = parseFloat(document.getElementById('cCostoUnit').value) || 0;
+  document.getElementById('cMontoTotal').textContent = `$${fmt(cant * costo)}`;
+}
+document.getElementById('cCantidad').addEventListener('input', actualizarMontoCompra);
+document.getElementById('cCostoUnit').addEventListener('input', actualizarMontoCompra);
+
+function calcularBalanceMes(){
+  const now = new Date();
+  const mesActual = now.getMonth(), anioActual = now.getFullYear();
+  const enMes = (fechaStr) => {
+    const d = new Date(fechaStr);
+    return d.getMonth() === mesActual && d.getFullYear() === anioActual;
+  };
+  const ingresos = ventas.filter(v => enMes(v.fecha)).reduce((a,v)=>a+v.total, 0);
+  const costos = compras.filter(c => enMes(c.fecha)).reduce((a,c)=>a+c.total, 0);
+  return {ingresos, costos, utilidad: ingresos - costos};
+}
+
+function renderCompras(){
+  poblarSelectCompra();
+  if(!document.getElementById('cFecha').value){
+    document.getElementById('cFecha').value = new Date().toISOString().slice(0,10);
+  }
+  actualizarMontoCompra();
+
+  const {ingresos, costos, utilidad} = calcularBalanceMes();
+  const box = document.getElementById('balanceBox');
+  document.getElementById('balanceMonto').textContent = `${utilidad < 0 ? '-' : ''}$${fmt(Math.abs(utilidad))}`;
+  document.getElementById('balanceLabel').textContent = `Ingresos $${fmt(ingresos)} − Costos $${fmt(costos)}`;
+  box.style.background = utilidad < 0
+    ? 'linear-gradient(135deg, var(--rust) 0%, #7A331E 100%)'
+    : 'linear-gradient(135deg, var(--charcoal) 0%, #3A322B 100%)';
+
+  const list = document.getElementById('comprasList');
+  if(compras.length === 0){
+    list.innerHTML = '<div class="empty">Aún no hay compras registradas.<br>Anota la primera arriba.</div>';
+    return;
+  }
+  const sorted = [...compras].sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+  list.innerHTML = sorted.map(c => `
+    <div class="venta-item">
+      <div>
+        <div class="prod">${c.insumo}</div>
+        <div class="meta">${new Date(c.fecha).toLocaleDateString('es-CL')} · ${fmtDec(c.cantidad)} × $${fmt(c.costoUnit)}${c.proveedor ? ' · '+c.proveedor : ''}</div>
+        <button class="del" data-id="${c.id}">Eliminar</button>
+      </div>
+      <div class="amt">$${fmt(c.total)}</div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      compras = compras.filter(c => c.id !== id);
+      saveCompraEliminada(id);
+      renderCompras();
+    });
+  });
+}
+
+document.getElementById('btnAddCompra').addEventListener('click', async () => {
+  const fecha = document.getElementById('cFecha').value || new Date().toISOString().slice(0,10);
+  const insumoKey = document.getElementById('cInsumo').value;
+  const cantidad = parseFloat(document.getElementById('cCantidad').value) || 0;
+  const costoUnit = parseFloat(document.getElementById('cCostoUnit').value) || 0;
+  const proveedor = document.getElementById('cProveedor').value.trim();
+
+  if(cantidad <= 0 || costoUnit <= 0){ showToast('Ingresa cantidad y costo válidos'); return; }
+
+  const opciones = listaInsumosCompra();
+  const opcion = opciones.find(o => o.key === insumoKey);
+  let insumoNombre;
+  if(insumoKey === '__otro__'){
+    insumoNombre = document.getElementById('cInsumoOtro').value.trim() || 'Insumo';
+  } else {
+    insumoNombre = opcion ? opcion.label.replace(/\s*\([^)]*\)\s*$/,'') : insumoKey;
+    // Sumar la cantidad comprada al stock correspondiente
+    if(opcion?.tipo === 'stock'){ stock[insumoKey] = (stock[insumoKey] || 0) + cantidad; }
+    else if(opcion?.tipo === 'aroma'){ const a = aromas.find(x=>x.key===insumoKey); if(a) a.qty += cantidad; }
+    else if(opcion?.tipo === 'frasco'){ const f = frascos.find(x=>x.key===insumoKey); if(f) f.qty += cantidad; }
+    else if(opcion?.tipo === 'colorante'){ const c = colorantes.find(x=>x.key===insumoKey); if(c) c.qty += cantidad; }
+    else if(opcion?.tipo === 'pabilo'){ const p = pabilos.find(x=>x.key===insumoKey); if(p) p.qty += cantidad; }
+    await saveStock();
+    renderStock();
+  }
+
+  const nuevaCompra = {
+    id: Date.now().toString(36),
+    fecha, insumo: insumoNombre, costoUnit, cantidad,
+    total: costoUnit * cantidad, proveedor
+  };
+  compras.push(nuevaCompra);
+  saveCompraNueva(nuevaCompra);
+  renderCompras();
+  renderVentas();
+
+  document.getElementById('cCantidad').value = '';
+  document.getElementById('cCostoUnit').value = '';
+  document.getElementById('cProveedor').value = '';
+  document.getElementById('cInsumoOtro').value = '';
+  actualizarMontoCompra();
+  showToast(opcion?.tipo !== 'otro' ? 'Compra registrada y sumada al Stock' : 'Compra registrada');
+});
+
+function updateVarianteSelect(){
+  const linea = document.getElementById('vLinea').value;
+  const sel = document.getElementById('vVarianteSelect');
+  const disponibles = terminados.filter(t => t.linea === linea && t.qty > 0);
+
+  if(linea === 'otro' || disponibles.length === 0){
+    sel.style.display = 'none';
+    document.getElementById('vProducto').style.display = 'block';
+  } else {
+    sel.style.display = 'block';
+    document.getElementById('vProducto').style.display = 'none';
+    sel.innerHTML = disponibles.map(t => `<option value="${t.key}">${t.variante} — disponibles: ${fmtDec(t.qty,0)}</option>`).join('');
+  }
+}
+document.getElementById('vLinea').addEventListener('change', updateVarianteSelect);
+
+function renderVentas(){
+  updateVarianteSelect();
+  const now = new Date();
+  const mesActual = now.getMonth();
+  const anioActual = now.getFullYear();
+  const delMes = ventas.filter(v => {
+    const d = new Date(v.fecha);
+    return d.getMonth() === mesActual && d.getFullYear() === anioActual;
+  });
+  const totalMes = delMes.reduce((a,v)=>a+v.total, 0);
+  document.getElementById('ventasMesTotal').textContent = `$${fmt(totalMes)}`;
+  document.getElementById('ventasMesLabel').textContent = `${now.toLocaleDateString('es-CL',{month:'long',year:'numeric'})} · ${delMes.length} venta(s)`;
+
+  const list = document.getElementById('ventasList');
+  if(ventas.length === 0){
+    list.innerHTML = '<div class="empty">Aún no hay ventas registradas.<br>Anota la primera arriba.</div>';
+    return;
+  }
+  const sorted = [...ventas].sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+  list.innerHTML = sorted.map(v => `
+    <div class="venta-item">
+      <div>
+        <div class="prod">${v.producto || LINES[v.linea]?.fullLabel || v.linea}</div>
+        <div class="meta">${new Date(v.fecha).toLocaleDateString('es-CL')} · x${v.cantidad}${v.cliente ? ' · '+v.cliente : ''}</div>
+        <button class="del" data-id="${v.id}">Eliminar</button>
+      </div>
+      <div class="amt">$${fmt(v.total)}</div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      ventas = ventas.filter(v => v.id !== id);
+      saveVentaEliminada(id);
+      renderVentas();
+    });
+  });
+}
+
+document.getElementById('btnAddVenta').addEventListener('click', () => {
+  const fecha = document.getElementById('vFecha').value || new Date().toISOString().slice(0,10);
+  const linea = document.getElementById('vLinea').value;
+  const cantidad = parseFloat(document.getElementById('vCantidad').value) || 1;
+  const precio = parseFloat(document.getElementById('vPrecio').value) || 0;
+  if(precio <= 0){ showToast('Ingresa un precio válido'); return; }
+
+  const selVisible = document.getElementById('vVarianteSelect').style.display !== 'none';
+  let producto = document.getElementById('vProducto').value.trim();
+  let terminadoUsado = null;
+
+  if(selVisible){
+    const key = document.getElementById('vVarianteSelect').value;
+    terminadoUsado = terminados.find(t => t.key === key);
+    if(!terminadoUsado){ showToast('Selecciona una variante'); return; }
+    if(cantidad > terminadoUsado.qty){ showToast(`Solo hay ${fmtDec(terminadoUsado.qty,0)} disponibles`); return; }
+    producto = terminadoUsado.variante;
+  }
+
+  const nuevaVenta = {
+    id: Date.now().toString(36),
+    fecha, linea, producto, cantidad,
+    precioUnit: precio, total: precio*cantidad,
+    cliente: document.getElementById('vCliente').value.trim()
+  };
+  ventas.push(nuevaVenta);
+  saveVentaNueva(nuevaVenta);
+
+  if(terminadoUsado){
+    terminadoUsado.qty = Math.max(0, terminadoUsado.qty - cantidad);
+    saveTerminados();
+    renderProduccion();
+  }
+
+  renderVentas();
+  renderCompras();
+  document.getElementById('vProducto').value = '';
+  document.getElementById('vCantidad').value = 1;
+  document.getElementById('vPrecio').value = '';
+  document.getElementById('vCliente').value = '';
+  showToast('Venta registrada');
+});
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+// ---------- Init ----------
+// El logo se carga desde una URL externa (Google Drive) en vez de venir embebido en el archivo,
+// para mantener el tamaño del archivo bajo y evitar el bug de Apps Script con archivos grandes.
+const LOGO_URL = "https://drive.google.com/file/d/1P7v4nd0bKFpeJ7UAdjU9tc0PMP5GTb_N/view?usp=drive_link";
+
+(async function init(){
+  document.getElementById('logoImg').src = normalizarFotoUrl(LOGO_URL);
+  document.getElementById('dateNow').textContent = new Date().toLocaleDateString('es-CL', {day:'numeric', month:'short'});
+  document.getElementById('vFecha').value = new Date().toISOString().slice(0,10);
+  await loadAll();
+  renderStock();
+  renderCostos();
+  renderProduccion();
+  renderCompras();
+  renderVentas();
+})();
+</script>
+</body>
+</html>
