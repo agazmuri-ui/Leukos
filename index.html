@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head> 
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Leukos · Panel de Negocios</title>
@@ -451,6 +451,15 @@ const DEFAULT_FRASCOS = [];
 
 const DEFAULT_AROMAS = [];
 
+const DEFAULT_MATERIALES = [
+  {key:'material_logo_crema', name:'Logo Crema', qty:0},
+  {key:'material_logo_gris', name:'Logo Gris', qty:0},
+  {key:'material_logo_negro', name:'Logo Negro', qty:0},
+  {key:'material_sticker_instrucciones', name:'Sticker instrucciones', qty:0},
+  {key:'material_bolsa_peq_negra', name:'Bolsa pequeña negra', qty:0},
+  {key:'material_bolsa_med_cafe', name:'Bolsa mediana café', qty:0}
+];
+
 // ---------- Config de líneas de costo ----------
 // "parametros": características físicas de la vela (editables, afectan el cálculo)
 // "costos": precio pagado por cada insumo
@@ -579,6 +588,7 @@ let stock = {};
 let stockFotos = {}; // fotos de los insumos fijos (cera, aceite, etc.), por key
 let aromas = [];
 let frascos = [];
+let materiales = [];
 let colorantes = [];
 let pabilos = [];
 let terminados = [];
@@ -642,6 +652,7 @@ async function loadAll(){
     frascos = [];
     colorantes = [];
     pabilos = [];
+    materiales = [];
     (data.stock || []).forEach(row => {
       if(!row.Key) return;
       if(String(row.Key).startsWith('aroma_')){
@@ -652,6 +663,8 @@ async function loadAll(){
         colorantes.push({key: row.Key, name: row.Insumo || 'Colorante', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
       } else if(String(row.Key).startsWith('pabilopar_')){
         pabilos.push({key: row.Key, name: row.Insumo || 'Pabilo', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
+      } else if(String(row.Key).startsWith('material_')){
+        materiales.push({key: row.Key, name: row.Insumo || 'Material', qty: parseFloat(row.Cantidad) || 0, foto: row.Foto || ''});
       } else {
         stock[row.Key] = parseFloat(row.Cantidad) || 0;
         if(row.Foto) stockFotos[row.Key] = row.Foto;
@@ -662,6 +675,11 @@ async function loadAll(){
       frascos = DEFAULT_FRASCOS.map(f => ({...f}));
       colorantes = DEFAULT_COLORANTES.map(c => ({...c}));
       pabilos = DEFAULT_PABILOS.map(p => ({...p}));
+    }
+    // Materiales generales es una categoría nueva: la sembramos la primera vez que se detecta
+    // vacía, aunque el resto del Sheet ya tenga datos (no solo en un Sheet totalmente nuevo).
+    if(materiales.length === 0){
+      materiales = DEFAULT_MATERIALES.map(m => ({...m}));
     }
 
     costosConfig = {};
@@ -713,6 +731,7 @@ async function loadAll(){
     frascos = DEFAULT_FRASCOS.map(f => ({...f}));
     colorantes = DEFAULT_COLORANTES.map(c => ({...c}));
     pabilos = DEFAULT_PABILOS.map(p => ({...p}));
+    materiales = DEFAULT_MATERIALES.map(m => ({...m}));
     costosConfig = {};
     ventas = [];
     terminados = [];
@@ -765,8 +784,9 @@ async function saveStockNow(){
     const frascoItems = frascos.map(f => ({key: f.key, name: f.name, qty: f.qty || 0, unit: 'un', foto: f.foto || ''}));
     const coloranteItems = colorantes.map(c => ({key: c.key, name: c.name, qty: c.qty || 0, unit: 'un', foto: c.foto || ''}));
     const pabiloItems = pabilos.map(p => ({key: p.key, name: p.name, qty: p.qty || 0, unit: 'm', foto: p.foto || ''}));
+    const materialItems = materiales.map(m => ({key: m.key, name: m.name, qty: m.qty || 0, unit: 'un', foto: m.foto || ''}));
     const resultado = await postToSheet('stock', {
-      items: [...fixedItems, ...aromaItems, ...frascoItems, ...coloranteItems, ...pabiloItems],
+      items: [...fixedItems, ...aromaItems, ...frascoItems, ...coloranteItems, ...pabiloItems, ...materialItems],
       versionEsperada: versions.stock
     });
     if(resultado && resultado.conflicto){
@@ -1144,6 +1164,82 @@ function renderStock(){
           if(!f) return;
           const delta = btn.dataset.fact === 'plus' ? 5 : -5;
           f.qty = Math.max(0, Math.round(((f.qty||0) + delta) * 100) / 100);
+          renderStock();
+          saveStock();
+        });
+      });
+
+      const materialesBlock = document.createElement('div');
+      materialesBlock.className = 'aroma-block material-block';
+      materialesBlock.innerHTML = `<div class="aroma-title material-title">Materiales generales</div>`;
+      materiales.forEach(mat => {
+        const isLow = (mat.qty||0) <= 10;
+        const pct = Math.max(4, Math.min(100, ((mat.qty||0)/100)*100));
+        const row = document.createElement('div');
+        row.className = 'stock-item aroma-item';
+        row.innerHTML = `
+          <div class="stock-row has-thumb">
+            <input type="text" class="material-name-input" data-mkey="${mat.key}" value="${mat.name}">
+            <div class="stock-controls">
+              ${isLow ? '<span class="low-tag">bajo</span>' : ''}
+              <button class="qtybtn" data-mact="minus" data-mkey="${mat.key}">−</button>
+              <input type="number" step="any" class="material-qty-input" data-mkey="${mat.key}" value="${mat.qty}">
+              <span class="unit-label">un</span>
+              <button class="qtybtn" data-mact="plus" data-mkey="${mat.key}">+</button>
+              <button class="aroma-del" data-mkey="${mat.key}">eliminar</button>
+            </div>
+          </div>
+          <div class="bar-track"><div class="bar-fill coco" style="width:${pct}%"></div></div>
+        `;
+        const thumbM = crearThumbEl(mat.foto, 'm', mat.key, () => {
+          const url = pedirFoto(mat.foto);
+          if(url === null) return;
+          mat.foto = url.trim();
+          renderStock();
+          saveStock();
+        });
+        row.querySelector('.stock-row').insertBefore(thumbM, row.querySelector('.material-name-input'));
+        materialesBlock.appendChild(row);
+      });
+      const addMaterialBtn = document.createElement('button');
+      addMaterialBtn.className = 'aroma-add';
+      addMaterialBtn.textContent = '+ Agregar material';
+      materialesBlock.appendChild(addMaterialBtn);
+      wrap.appendChild(materialesBlock);
+
+      addMaterialBtn.addEventListener('click', () => {
+        materiales.push({key: 'material_' + Date.now().toString(36), name: 'Nuevo material', qty: 0});
+        renderStock();
+        saveStock();
+      });
+      materialesBlock.querySelectorAll('.aroma-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          materiales = materiales.filter(m => m.key !== btn.dataset.mkey);
+          renderStock();
+          saveStock();
+        });
+      });
+      materialesBlock.querySelectorAll('.material-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const m = materiales.find(x => x.key === inp.dataset.mkey);
+          if(m) m.name = inp.value.trim() || 'Material';
+          saveStock();
+        });
+      });
+      materialesBlock.querySelectorAll('.material-qty-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+          const m = materiales.find(x => x.key === inp.dataset.mkey);
+          if(m) m.qty = Math.max(0, parseFloat(inp.value) || 0);
+          renderStock();
+          saveStock();
+        });
+      });
+      materialesBlock.querySelectorAll('[data-mact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const m = materiales.find(x => x.key === btn.dataset.mkey);
+          if(!m) return;
+          const delta = btn.dataset.mact === 'plus' ? 5 : -5;
+          m.qty = Math.max(0, Math.round(((m.qty||0) + delta) * 100) / 100);
           renderStock();
           saveStock();
         });
